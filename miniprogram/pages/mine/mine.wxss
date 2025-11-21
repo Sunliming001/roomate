@@ -1,0 +1,9 @@
+page { background: #FAF5E6; }
+.header { padding: 60rpx 40rpx; display: flex; align-items: center; }
+.avatar { width: 120rpx; height: 120rpx; background: #fff; border-radius: 50%; margin-right: 30rpx; border: 4rpx solid #fff; }
+.name { font-size: 36rpx; font-weight: bold; }
+
+.menu { background: #fff; margin: 20rpx; border-radius: 20rpx; padding: 0 20rpx; }
+.item { padding: 30rpx 0; border-bottom: 1rpx solid #eee; font-size: 30rpx; display: flex; justify-content: space-between; }
+.item:last-child { border: none; }
+.badge { background: #e74c3c; color: #fff; padding: 2rpx 12rpx; border-radius: 20rpx; font-size: 24rpx; }

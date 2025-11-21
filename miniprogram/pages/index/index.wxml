@@ -1,0 +1,68 @@
+<view class="page-container">
+  <!-- 1. 固定顶部导航 (适配刘海屏) -->
+  <view class="custom-header" style="padding-top: {{statusBarHeight}}px; height: {{navHeight}}px;">
+    <view class="header-row">
+      <!-- 左侧：城市选择 -->
+      <picker mode="region" level="city" bindchange="onCityChange">
+        <view class="city-picker">
+          <text class="city-name">{{currentCity}}</text>
+          <text class="arrow-down">▾</text>
+        </view>
+      </picker>
+
+      <!-- 右侧：地图搜索框 -->
+      <view class="search-pill" bindtap="openMapSearch">
+        <icon type="search" size="14" color="#666"></icon>
+        <text class="search-placeholder">{{searchPlaceholder}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 2. 占位符 (防止内容被顶部遮挡) -->
+  <view style="height: {{statusBarHeight + navHeight + 10}}px"></view>
+
+  <!-- 3. 瀑布流内容 -->
+  <view class="waterfall-container">
+    <!-- 左列 -->
+    <view class="col">
+      <block wx:for="{{leftList}}" wx:key="id">
+        <view class="xhs-card" bindtap="goDetail" data-id="{{item.id}}">
+          <image src="{{item.cover}}" mode="widthFix" class="card-img"></image>
+          <view class="card-cont">
+            <view class="card-tit">{{item.community}} {{item.layout.room}}室</view>
+            <view class="card-btm">
+              <view class="usr">
+                <image class="avt" src="{{item.publisher.avatar}}"></image>
+                <text class="nm">{{item.publisher.nickName}}</text>
+              </view>
+              <text class="lk">❤️ {{item.vacantCount}}缺</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    <!-- 右列 -->
+    <view class="col">
+      <block wx:for="{{rightList}}" wx:key="id">
+        <view class="xhs-card" bindtap="goDetail" data-id="{{item.id}}">
+          <image src="{{item.cover}}" mode="widthFix" class="card-img"></image>
+          <view class="card-cont">
+            <view class="card-tit">{{item.community}} {{item.layout.room}}室</view>
+            <view class="card-btm">
+              <view class="usr">
+                <image class="avt" src="{{item.publisher.avatar}}"></image>
+                <text class="nm">{{item.publisher.nickName}}</text>
+              </view>
+              <text class="lk">❤️ {{item.vacantCount}}缺</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+  
+  <!-- 空状态提示 -->
+  <view wx:if="{{leftList.length === 0 && rightList.length === 0}}" class="empty-tip">
+    暂无该区域房源，快去发布一条吧~
+  </view>
+</view>

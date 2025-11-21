@@ -1,0 +1,10 @@
+<view class="header">
+  <view class="avatar"></view>
+  <view class="name">租房用户</view>
+</view>
+
+<view class="menu">
+  <view class="item">我的发布</view>
+  <view class="item">我的收藏</view>
+  <view class="item">消息通知 <text class="badge">2</text></view>
+</view>

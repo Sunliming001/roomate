@@ -1,0 +1,47 @@
+/* 顶部导航栏背景 */
+.custom-header {
+  position: fixed; top: 0; left: 0; width: 100%;
+  background: #fff; z-index: 100;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.03);
+  display: flex; flex-direction: column; justify-content: flex-end; /* 内容靠下 */
+}
+
+.header-row {
+  height: 44px; /* 胶囊按钮高度 */
+  display: flex; align-items: center;
+  padding: 0 30rpx;
+}
+
+/* 城市选择 */
+.city-picker {
+  display: flex; align-items: center; margin-right: 24rpx;
+  font-weight: bold; font-size: 32rpx; color: #333;
+}
+.arrow-down { font-size: 24rpx; margin-left: 6rpx; color: #333; }
+
+/* 搜索胶囊 */
+.search-pill {
+  flex: 1;
+  height: 64rpx;
+  background: #F5F5F7; /* 苹果灰 */
+  border-radius: 32rpx;
+  display: flex; align-items: center;
+  padding: 0 20rpx;
+  color: #999; font-size: 28rpx;
+}
+.search-placeholder { margin-left: 12rpx; }
+
+/* 瀑布流卡片修复 */
+.waterfall-container { padding: 10rpx 20rpx; display: flex; justify-content: space-between; align-items: flex-start; }
+.col { width: 48.5%; }
+.xhs-card { background: #fff; border-radius: 12rpx; overflow: hidden; margin-bottom: 20rpx; box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05); }
+.card-img { width: 100%; display: block; }
+.card-cont { padding: 16rpx; }
+.card-tit { font-size: 28rpx; font-weight: bold; color: #333; margin-bottom: 16rpx; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+.card-btm { display: flex; justify-content: space-between; align-items: center; }
+.usr { display: flex; align-items: center; }
+.avt { width: 32rpx; height: 32rpx; border-radius: 50%; margin-right: 8rpx; background: #eee; }
+.nm { font-size: 22rpx; color: #666; max-width: 120rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;}
+.lk { font-size: 22rpx; color: #999; }
+
+.empty-tip { text-align: center; color: #999; margin-top: 100rpx; font-size: 28rpx; }

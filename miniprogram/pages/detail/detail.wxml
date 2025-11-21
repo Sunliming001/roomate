@@ -1,0 +1,69 @@
+<view class="container">
+  <!-- 顶部大图 -->
+  <image src="{{info.cover}}" class="header-img" mode="aspectFill"></image>
+
+  <view class="content-layer">
+    <!-- 标题区 -->
+    <view class="card glass-panel">
+      <view class="title">{{info.community}} {{info.layout.room}}室{{info.layout.hall}}厅</view>
+      <view class="sub-info">
+        <text class="tag">整租 ¥{{info.totalPrice}}</text>
+        <text class="tag">期望入住: {{info.moveInDate}}</text>
+      </view>
+    </view>
+
+   <!-- 发布者信息 -->
+   <view class="card glass-panel user-card">
+      <view class="user-top">
+        <image class="u-avatar" src="{{info.publisher.avatar || '/images/default-avatar.png'}}"></image>
+        <view class="u-info-right">
+          <view class="u-name-row">
+             <text class="u-name">{{info.publisher.nickName}}</text>
+             <text class="gender-icon {{info.publisher.gender==1?'boy':'girl'}}">{{info.publisher.gender==1?'♂':'♀'}}</text>
+          </view>
+          <view class="u-base-info">
+             {{info.publisher.job}} · {{info.publisher.age}}岁
+          </view>
+        </view>
+      </view>
+      
+      <!-- 标签展示区域 -->
+      <view class="u-tags-row">
+        <block wx:for="{{info.publisher.tagList}}" wx:key="index">
+          <view class="tag-badge">{{item}}</view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 房间详情表格 -->
+    <view class="section-title">房间详情</view>
+    <view class="card glass-panel room-list">
+      <view class="table-header">
+        <text>房间</text> <text>面积</text> <text>价格</text> <text>状态</text>
+      </view>
+      <block wx:for="{{info.rooms}}" wx:key="index">
+        <view class="table-row {{item.status === 1 ? 'disabled' : ''}}">
+          <text class="t-name">{{item.name}}</text>
+          <text>{{item.area}}㎡</text>
+          <text class="t-price">¥{{item.price}}</text>
+          <view class="t-status">
+             <text class="badge {{item.status===0?'green':'gray'}}">{{item.status===0?'可租':'已满'}}</text>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 描述 -->
+    <view class="section-title">详细描述</view>
+    <view class="card glass-panel desc-box">
+      <text>{{info.desc}}</text>
+      <view class="time">发布于 {{info.createTime}}</view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="footer glass">
+    <view class="fav-icon">☆ 收藏</view>
+    <button class="join-btn">私聊求租</button>
+  </view>
+</view>

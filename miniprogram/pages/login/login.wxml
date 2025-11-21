@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="header">
+    <view class="title">完善资料</view>
+    <view class="sub-title">让未来的室友更快认识你</view>
+  </view>
+
+  <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+    <image class="avatar-img" src="{{userInfo.avatar}}" wx:if="{{userInfo.avatar}}" mode="aspectFill"></image>
+    <view class="camera-icon" wx:else>📷</view>
+  </button>
+
+  <view class="form-area">
+    <!-- 其他输入框保持不变，样式已在wxss优化 -->
+    <view class="input-group">
+      <view class="label">昵称</view>
+      <input type="nickname" class="input" placeholder="例如：Momo" bindchange="onNickNameChange"/>
+    </view>
+    <!-- ... 剩下的输入代码同上一次 ... -->
+    <view class="input-group">
+      <view class="label">性别</view>
+      <radio-group class="radio-row" bindchange="onGenderChange">
+        <label class="radio"><radio value="1" color="#FF2442"/> 男生</label>
+        <label class="radio"><radio value="2" color="#FF2442"/> 女生</label>
+      </radio-group>
+    </view>
+    
+    <!-- 这里省略其他标签代码，直接复用逻辑即可 -->
+     <button class="save-btn" bindtap="saveUserInfo">进入友邻</button>
+  </view>
+</view>
