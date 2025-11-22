@@ -1,78 +1,108 @@
 // utils/mock.js
 
-// 获取当前登录用户
-const getCurrentUser = () => {
-  // 优先从缓存取，如果没有则返回null
-  return wx.getStorageSync('my_user_info') || null;
+// 获取当前用户
+const getCurrentUser = () => wx.getStorageSync('my_user_info') || null;
+
+// 更新用户信息
+const updateUserInfo = (info) => {
+  wx.setStorageSync('my_user_info', info);
 }
 
-const initData = () => {
-  const exists = wx.getStorageSync('room_list_v3');
-  if (!exists) {
-    // 造一条假数据，带上完整的发布者画像
-    const initialData = [
-      {
-        id: 1,
-        publisher: {
-          nickName: '西瓜妹',
-          avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-          job: 'UI设计',
-          age: 26,
-          tagList: ['爱干净', 'E人社牛', '猫狗双全']
-        },
-        community: '华润悦府',
-        layout: { room: 3, hall: 2, toilet: 2 },
-        rooms: [
-          { name: '主卧', area: 25, price: 3500, status: 1 },
-          { name: '次卧A', area: 18, price: 2800, status: 0 },
-          { name: '次卧B', area: 15, price: 2200, status: 0 }
-        ],
-        totalPrice: 8500,
-        moveInDate: '2023-12-01',
-        cover: 'https://images.unsplash.com/photo-1502005229766-93976a1775d5?w=600',
-        desc: '精装修，采光超好。',
-        createTime: '2023-11-20'
-      }
-    ];
-    wx.setStorageSync('room_list_v3', initialData);
-  }
+const getList = () => {
+  let list = wx.getStorageSync('room_list_v4') || [];
+  // 过滤掉已完成签约的 (status === 'signed')
+  return list.filter(item => item.status !== 'signed');
 }
 
-const getList = (keyword = '') => {
-  initData();
-  let list = wx.getStorageSync('room_list_v3') || [];
-  
-  // 搜索功能实现
-  if (keyword) {
-    list = list.filter(item => 
-      item.community.includes(keyword) || item.desc.includes(keyword)
-    );
-  }
-  return list;
+// 获取我的签约
+const getMyContracts = () => {
+  let list = wx.getStorageSync('room_list_v4') || [];
+  return list.filter(item => item.status === 'signed');
 }
 
-const addRoom = (data) => {
+// 获取我的发布
+const getMyPublish = () => {
+  const user = getCurrentUser();
+  if (!user) return [];
+  let list = wx.getStorageSync('room_list_v4') || [];
+  return list.filter(item => item.publisher.nickName === user.nickName); // 简单用昵称匹配，实际应用ID
+}
+
+// 获取我的收藏
+const getMyFavs = () => {
   let list = getList();
+  // 简单模拟：实际开发应存单独的fav表
+  return list.filter(item => item.isFav);
+}
+
+// 发布房源
+const addRoom = (data) => {
+  let list = wx.getStorageSync('room_list_v4') || [];
   const currentUser = getCurrentUser();
-  
   const newRoom = {
     id: new Date().getTime(),
-    publisher: currentUser, // 使用真实注册信息
+    publisher: currentUser,
     createTime: new Date().toISOString().split('T')[0],
+    favCount: 0,
+    isFav: false,
+    status: 'active', // active:招募中, signed:已签约
     ...data
   };
   list.unshift(newRoom);
-  wx.setStorageSync('room_list_v3', list);
+  wx.setStorageSync('room_list_v4', list);
 }
 
-const getDetail = (id) => {
-  let list = getList();
-  return list.find(i => i.id == id);
+// 收藏逻辑
+const toggleFav = (id) => {
+  let list = wx.getStorageSync('room_list_v4') || [];
+  let target = list.find(i => i.id == id);
+  if (target) {
+    target.isFav = !target.isFav;
+    target.favCount = target.isFav ? (target.favCount || 0) + 1 : (target.favCount || 1) - 1;
+    wx.setStorageSync('room_list_v4', list);
+    
+    // 生成系统消息
+    if(target.isFav) addMessage('系统', `有人收藏了你的房源：${target.community}`);
+  }
+}
+
+// 申请加入逻辑 (模拟群聊和签约)
+const joinRoom = (id, gender) => {
+  let list = wx.getStorageSync('room_list_v4') || [];
+  let target = list.find(i => i.id == id);
+  
+  if (target) {
+    // 1. 找到第一个空房间
+    let emptyRoom = target.rooms.find(r => r.status === 0);
+    if (emptyRoom) {
+      emptyRoom.status = 1; // 标记为占用
+      // 2. 检查是否满员
+      const isFull = target.rooms.every(r => r.status === 1);
+      
+      if (isFull) {
+        // 满员 -> 签约完成
+        target.status = 'signed';
+        addMessage('签约通知', `恭喜！${target.community} 已满员，系统已自动生成租房合约，请在“我的签约”查看。`);
+      } else {
+        addMessage('新室友', `有新室友加入了 ${target.community}，当前还缺 ${target.rooms.filter(r=>r.status===0).length} 人。`);
+      }
+      
+      wx.setStorageSync('room_list_v4', list);
+      return { success: true, isFull };
+    }
+  }
+  return { success: false };
+}
+
+// 消息列表
+const getMessages = () => wx.getStorageSync('app_msgs') || [];
+const addMessage = (title, content) => {
+  let msgs = getMessages();
+  msgs.unshift({ title, content, time: new Date().toLocaleString() });
+  wx.setStorageSync('app_msgs', msgs);
 }
 
 module.exports = {
-  getCurrentUser,
-  getList,
-  addRoom,
-  getDetail
+  getCurrentUser, updateUserInfo, getList, addRoom, getDetail: (id) => getList().concat(getMyContracts()).find(i => i.id == id),
+  toggleFav, joinRoom, getMessages, getMyContracts, getMyPublish, getMyFavs
 }

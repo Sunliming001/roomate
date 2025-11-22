@@ -1,9 +1,34 @@
-page { background: #FAF5E6; }
-.header { padding: 60rpx 40rpx; display: flex; align-items: center; }
-.avatar { width: 120rpx; height: 120rpx; background: #fff; border-radius: 50%; margin-right: 30rpx; border: 4rpx solid #fff; }
-.name { font-size: 36rpx; font-weight: bold; }
+page { background: #F6F6F6; }
+.container { padding: 0 30rpx; }
 
-.menu { background: #fff; margin: 20rpx; border-radius: 20rpx; padding: 0 20rpx; }
-.item { padding: 30rpx 0; border-bottom: 1rpx solid #eee; font-size: 30rpx; display: flex; justify-content: space-between; }
-.item:last-child { border: none; }
-.badge { background: #e74c3c; color: #fff; padding: 2rpx 12rpx; border-radius: 20rpx; font-size: 24rpx; }
+.profile-card { background: #fff; border-radius: 24rpx; padding: 30rpx; margin-bottom: 30rpx; }
+.p-top { display: flex; align-items: center; }
+.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; margin-right: 24rpx; background: #eee; }
+.name { font-size: 36rpx; font-weight: 900; margin-bottom: 10rpx; }
+.tags text { font-size: 22rpx; background: #F5F5F7; color: #666; padding: 4rpx 10rpx; border-radius: 8rpx; margin-right: 10rpx; }
+
+/* 统计模块 */
+.stats-grid { display: flex; justify-content: space-between; margin-bottom: 40rpx; }
+.stat-box { 
+  width: 30%; background: #fff; padding: 20rpx 0; border-radius: 16rpx; 
+  text-align: center; transition: all 0.2s; 
+  border: 2rpx solid transparent;
+}
+.stat-box.active { border-color: #FF2442; background: #FFF0F5; }
+.num { font-size: 36rpx; font-weight: 900; color: #333; }
+.lbl { font-size: 24rpx; color: #999; margin-top: 6rpx; }
+
+/* 列表区 */
+.list-title { font-size: 30rpx; font-weight: bold; margin-bottom: 20rpx; color: #333; }
+.item-card { background: #fff; border-radius: 16rpx; padding: 20rpx; display: flex; margin-bottom: 20rpx; }
+.i-img { width: 180rpx; height: 140rpx; border-radius: 12rpx; background: #eee; margin-right: 20rpx; }
+.i-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.i-title { font-size: 30rpx; font-weight: bold; }
+.i-desc { font-size: 24rpx; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400rpx;}
+.i-status { display: flex; justify-content: space-between; align-items: center; }
+.st-tag { font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 6rpx; }
+.st-tag.red { background: #FFF0F5; color: #FF2442; }
+.st-tag.gray { background: #eee; color: #999; }
+.price { font-weight: bold; color: #FF2442; font-size: 30rpx; }
+
+.empty-tip { text-align: center; color: #ccc; padding: 60rpx 0; font-size: 28rpx; }

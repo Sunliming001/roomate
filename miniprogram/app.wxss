@@ -1,30 +1,31 @@
-/* app.wxss */
+/* 全局重置与字体 - 使用微信原生字体栈 */
 page {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
   background-color: #F6F6F6;
   color: #333;
-}
-
-/* 磨砂玻璃效果 */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px); /* 仅iOS支持较好，安卓依赖背景色不透明度 */
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-/* 通用按钮 */
-.btn-primary {
-  background: var(--xhs-red);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 44rpx;
-  box-shadow: 0 6rpx 16rpx rgba(255, 36, 66, 0.3);
+  line-height: 1.5;
+  /* 定义安全区域变量 */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
 }
 
 .container {
   box-sizing: border-box;
 }
-/* 去除按钮默认边框 */
-button::after { border: none; } 
-button { background: transparent; }
+
+/* 磨砂玻璃通用类 */
+.glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* 底部按钮安全区域适配通用类 */
+.safe-bottom-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding-bottom: calc(20rpx + var(--safe-bottom)); 
+  background: #fff;
+  z-index: 99;
+}

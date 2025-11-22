@@ -1,69 +1,81 @@
 <view class="container">
+  <!-- 自定义导航栏 (返回按钮) -->
+  <view class="custom-nav" style="padding-top:{{statusBarHeight}}px; height:44px;">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-arrow">←</text>
+    </view>
+  </view>
+
   <!-- 顶部大图 -->
   <image src="{{info.cover}}" class="header-img" mode="aspectFill"></image>
 
+  <!-- 内容层 (上浮卡片) -->
   <view class="content-layer">
-    <!-- 标题区 -->
-    <view class="card glass-panel">
-      <view class="title">{{info.community}} {{info.layout.room}}室{{info.layout.hall}}厅</view>
+    <!-- 标题与价格 -->
+    <view class="card glass">
+      <view class="title-row">
+        <text class="title">{{info.community}} {{info.layout.room}}室</text>
+        <text class="price-tag">¥{{info.totalPrice}}/月</text>
+      </view>
       <view class="sub-info">
-        <text class="tag">整租 ¥{{info.totalPrice}}</text>
-        <text class="tag">期望入住: {{info.moveInDate}}</text>
-      </view>
-    </view>
-
-   <!-- 发布者信息 -->
-   <view class="card glass-panel user-card">
-      <view class="user-top">
-        <image class="u-avatar" src="{{info.publisher.avatar || '/images/default-avatar.png'}}"></image>
-        <view class="u-info-right">
-          <view class="u-name-row">
-             <text class="u-name">{{info.publisher.nickName}}</text>
-             <text class="gender-icon {{info.publisher.gender==1?'boy':'girl'}}">{{info.publisher.gender==1?'♂':'♀'}}</text>
-          </view>
-          <view class="u-base-info">
-             {{info.publisher.job}} · {{info.publisher.age}}岁
-          </view>
-        </view>
-      </view>
-      
-      <!-- 标签展示区域 -->
-      <view class="u-tags-row">
-        <block wx:for="{{info.publisher.tagList}}" wx:key="index">
-          <view class="tag-badge">{{item}}</view>
-        </block>
+        <view class="tag">期望入住: {{info.moveInDate}}</view>
+        <view class="tag">🔥 {{info.favCount || 0}}人收藏</view>
       </view>
     </view>
 
     <!-- 房间详情表格 -->
-    <view class="section-title">房间详情</view>
-    <view class="card glass-panel room-list">
-      <view class="table-header">
-        <text>房间</text> <text>面积</text> <text>价格</text> <text>状态</text>
-      </view>
-      <block wx:for="{{info.rooms}}" wx:key="index">
-        <view class="table-row {{item.status === 1 ? 'disabled' : ''}}">
-          <text class="t-name">{{item.name}}</text>
-          <text>{{item.area}}㎡</text>
-          <text class="t-price">¥{{item.price}}</text>
-          <view class="t-status">
-             <text class="badge {{item.status===0?'green':'gray'}}">{{item.status===0?'可租':'已满'}}</text>
+    <view class="card">
+      <view class="sec-title">房间分配情况</view>
+      <view class="room-list">
+        <block wx:for="{{info.rooms}}" wx:key="index">
+          <view class="room-item">
+            <view class="r-left">
+              <view class="r-name">{{item.name}}</view>
+              <view class="r-area">{{item.area}}㎡</view>
+            </view>
+            <view class="r-right">
+              <view class="r-status {{item.status==1?'full':'empty'}}">
+                {{item.status==1 ? '已有人' : '空缺 (¥'+item.price+')'}}
+              </view>
+            </view>
           </view>
-        </view>
-      </block>
+        </block>
+      </view>
     </view>
 
-    <!-- 描述 -->
-    <view class="section-title">详细描述</view>
-    <view class="card glass-panel desc-box">
-      <text>{{info.desc}}</text>
-      <view class="time">发布于 {{info.createTime}}</view>
+    <!-- 房主信息 -->
+    <view class="card user-card">
+       <image class="u-avt" src="{{info.publisher.avatar}}"></image>
+       <view class="u-info">
+         <view class="u-row">
+            <text class="u-n">{{info.publisher.nickName}}</text>
+            <text class="u-role">房主</text>
+         </view>
+         <view class="u-tags">
+           <text wx:for="{{info.publisher.tagList}}" wx:key="*this">{{item}}</text>
+         </view>
+       </view>
+       <view class="chat-icon" bindtap="goChat">💬</view>
+    </view>
+
+    <!-- 详细描述 -->
+    <view class="card">
+      <view class="sec-title">招募详情</view>
+      <text class="desc-text">{{info.desc}}</text>
     </view>
   </view>
 
+  <!-- 底部占位 -->
+  <view style="height: 180rpx;"></view>
+
   <!-- 底部操作栏 -->
-  <view class="footer glass">
-    <view class="fav-icon">☆ 收藏</view>
-    <button class="join-btn">私聊求租</button>
+  <view class="footer-bar">
+    <view class="icon-btn" bindtap="handleFav">
+      <text class="icon">{{info.isFav ? '★' : '☆'}}</text>
+      <text class="txt">{{info.isFav ? '已收藏' : '收藏'}}</text>
+    </view>
+    <button class="action-btn" bindtap="handleJoin" disabled="{{info.status==='signed'}}">
+      {{info.status==='signed' ? '已签约完成' : '我想加入'}}
+    </button>
   </view>
 </view>

@@ -1,77 +1,102 @@
-<view class="container">
-  <view class="title-bar">发布招募</view>
-  
-  <!-- 1. 基本信息区块 -->
-  <view class="section glass">
-    <view class="form-item" bindtap="searchCommunity">
-      <view class="label">小区名称</view>
-      <view class="input-box">
-        <!-- 增加定位图标 -->
-        <text style="margin-right:10rpx">📍</text>
-        <text class="{{formData.community ? 'val' : 'placeholder'}}">{{formData.community || '点击选择位置'}}</text>
+<view class="container" style="padding-top: {{paddingTop}}px">
+  <view class="page-title">发布房源</view>
+
+  <!-- 1. 基础信息卡片 -->
+  <view class="card">
+    <!-- 位置选择：整个行都可以点击 -->
+    <view class="form-row click-row" bindtap="chooseLocation">
+      <text class="label">小区地点</text>
+      <view class="val-box">
+        <text class="loc-icon">📍</text>
+        <text class="val-text {{formData.community?'':'ph'}}">{{formData.community || '点击选择小区'}}</text>
         <text class="arrow">></text>
       </view>
     </view>
 
-    <view class="form-item">
-      <view class="label">户型</view>
-      <view class="layout-picker">
-        <input type="number" placeholder="3" bindinput="onRoomChange" value="{{formData.layout.room}}" />
+    <!-- 户型设置：输入数字触发动态展开 -->
+    <view class="form-row">
+      <text class="label">户型设置</text>
+      <view class="input-wrap">
+        <input class="s-input highlight" type="number" placeholder="3" bindinput="onRoomCountInput" value="{{formData.layout.room}}"/>
         <text>室</text>
-        <input type="number" placeholder="1" bindinput="bindInput" data-field="layout.hall" />
+        <input class="s-input" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.hall" value="{{formData.layout.hall}}"/> 
         <text>厅</text>
-        <input type="number" placeholder="1" bindinput="bindInput" data-field="layout.toilet" />
+        <input class="s-input" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.toilet" value="{{formData.layout.toilet}}"/> 
         <text>卫</text>
       </view>
     </view>
 
-    <view class="form-item">
-      <view class="label">整租总价 (月)</view>
-      <input type="digit" placeholder="¥ 8500" bindinput="bindInput" data-field="totalPrice" />
-    </view>
-    
-    <view class="form-item">
-      <view class="label">期待入住</view>
-      <picker mode="date" start="2023-11-01" bindchange="bindDateChange">
-        <view class="picker-val">{{formData.moveInDate || '请选择日期'}}</view>
-      </picker>
+    <view class="form-row">
+      <text class="label">整租总价</text>
+      <view class="input-wrap">
+        <input class="l-input" type="digit" placeholder="8500" bindinput="bindInput" data-path="formData.totalPrice" value="{{formData.totalPrice}}"/>
+        <text style="margin-left:10rpx">元/月</text>
+      </view>
     </view>
   </view>
 
-  <!-- 2. 动态房间配置 (核心逻辑) -->
-  <view class="section-title">房间详情设置 ({{formData.layout.room}}个房间)</view>
-  <view class="section glass" wx:if="{{formData.rooms.length > 0}}">
-    
-    <block wx:for="{{formData.rooms}}" wx:key="index">
-      <view class="room-row">
-        <view class="room-header">
-          <text class="room-idx">房间 {{index + 1}}</text>
-          <!-- 状态开关：空闲/自住 -->
-          <switch checked="{{item.status === 0}}" scale="0.7" color="#FF2442" bindchange="toggleRoomStatus" data-idx="{{index}}"/>
-          <text class="status-txt">{{item.status === 0 ? '招募中' : '已有人'}}</text>
-        </view>
+  <!-- 2. 动态房间详细配置 (核心修复功能) -->
+  <view class="section-header" wx:if="{{formData.rooms.length > 0}}">
+    <text>房间详情 (共{{formData.rooms.length}}间)</text>
+    <text class="sub-tip">请勾选已有人住的房间</text>
+  </view>
+  
+  <block wx:for="{{formData.rooms}}" wx:key="index">
+    <view class="card room-card {{item.status==1 ? 'occupied-bg' : ''}}">
+      <view class="room-top">
+        <text class="room-badge">房间 {{index + 1}}</text>
         
-        <view class="room-inputs">
-          <input placeholder="房间名(如:主卧)" value="{{item.name}}" bindinput="updateRoom" data-idx="{{index}}" data-key="name"/>
-          <input type="digit" placeholder="面积㎡" value="{{item.area}}" bindinput="updateRoom" data-idx="{{index}}" data-key="area"/>
-          <input type="digit" placeholder="租金/月" value="{{item.price}}" bindinput="updateRoom" data-idx="{{index}}" data-key="price"/>
-        </view>
-        
-        <!-- 简单的图片上传模拟 -->
-        <view class="upload-sim" bindtap="uploadRoomImg" data-idx="{{index}}">
-          <text wx:if="{{!item.photos.length}}">+ 添加照片</text>
-          <image wx:else src="{{item.photos[0]}}" mode="aspectFill" class="thumb"></image>
+        <!-- 状态开关 -->
+        <view class="status-switch">
+          <text class="sw-label {{item.status==1?'occupied-text':''}}">{{item.status==1 ? '🚫 已有人住' : '✅ 正在招募'}}</text>
+          <switch scale="0.7" color="#FF2442" checked="{{item.status==1}}" bindchange="toggleRoomStatus" data-idx="{{index}}"/>
         </view>
       </view>
-      <view class="divider" wx:if="{{index < formData.rooms.length -1}}"></view>
-    </block>
+
+      <view class="room-body">
+        <!-- 第一行：名称、面积、租金 -->
+        <view class="r-row">
+          <view class="r-field">
+            <text class="f-label">房间名</text>
+            <input class="f-input" placeholder="如:主卧" value="{{item.name}}" bindinput="updateRoom" data-idx="{{index}}" data-field="name"/>
+          </view>
+          <view class="r-field">
+            <text class="f-label">面积(㎡)</text>
+            <input class="f-input" type="digit" placeholder="20" value="{{item.area}}" bindinput="updateRoom" data-idx="{{index}}" data-field="area"/>
+          </view>
+          <view class="r-field" wx:if="{{item.status==0}}">
+            <text class="f-label">租金/月</text>
+            <input class="f-input red" type="digit" placeholder="2000" value="{{item.price}}" bindinput="updateRoom" data-idx="{{index}}" data-field="price"/>
+          </view>
+        </view>
+
+        <!-- 第二行：照片上传 -->
+        <view class="photo-box" bindtap="uploadRoomPhoto" data-idx="{{index}}">
+          <block wx:if="{{item.photos && item.photos.length > 0}}">
+            <image src="{{item.photos[0]}}" mode="aspectFill" class="preview-img"></image>
+            <view class="re-upload-tip">点击更换</view>
+          </block>
+          <block wx:else>
+            <view class="upload-placeholder">
+              <text class="cam-icon">📷</text>
+              <text>添加房间照片</text>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 3. 补充描述 -->
+  <view class="card">
+    <textarea class="desc-area" placeholder="补充描述：比如对室友的要求(不抽烟/作息规律)、房屋周边设施(地铁/超市)等..." bindinput="bindInput" data-path="formData.desc" value="{{formData.desc}}" maxlength="500"></textarea>
   </view>
 
-  <!-- 3. 补充说明 -->
-  <view class="section glass">
-    <textarea placeholder="补充一点对室友的要求吧，比如：不接受情侣，安静..." bindinput="bindInput" data-field="desc"></textarea>
-  </view>
+  <!-- 底部占位，防止遮挡 -->
+  <view style="height: 200rpx;"></view>
 
-    <!-- 修复：按钮样式 -->
-    <button class="btn-primary pub-btn" bindtap="submit">发布笔记</button>
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <button class="pub-btn" bindtap="submit">发布找舍友</button>
+  </view>
 </view>

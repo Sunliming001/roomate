@@ -1,66 +1,51 @@
-// pages/mine/mine.js
+const app = getApp();
+const mock = require('../../utils/mock.js');
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    paddingTop: app.globalData.statusBarHeight + 10,
+    user: {},
+    stats: {},
+    // 当前选中的模块
+    activeTab: 'pub', // 默认显示发布
+    listData: []
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-
+    const user = mock.getCurrentUser();
+    if(!user) return wx.navigateTo({ url: '/pages/login/login' });
+    
+    this.setData({ 
+      user,
+      stats: {
+        pub: mock.getMyPublish().length,
+        fav: mock.getMyFavs().length,
+        contract: mock.getMyContracts().length
+      }
+    });
+    // 刷新当前列表
+    this.loadList(this.data.activeTab);
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  // 点击切换模块
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    this.loadList(tab);
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
+  loadList(tab) {
+    let data = [];
+    if (tab === 'pub') data = mock.getMyPublish();
+    if (tab === 'fav') data = mock.getMyFavs();
+    if (tab === 'contract') data = mock.getMyContracts();
+    
+    this.setData({ 
+      activeTab: tab,
+      listData: data 
+    });
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+  goDetail(e) {
+    wx.navigateTo({ url: `/pages/detail/detail?id=${e.currentTarget.dataset.id}` });
   }
 })

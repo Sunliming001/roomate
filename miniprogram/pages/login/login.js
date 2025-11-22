@@ -1,56 +1,54 @@
+const app = getApp();
+const db = wx.cloud.database(); // 获取数据库引用
+
 Page({
   data: {
-    userInfo: {
-      avatar: '', // 默认头像需自己找一张放images文件夹，或者留空
-      nickName: '',
-      gender: 0,
-      age: '',
-      job: '',
-      tags: {} // 使用对象存储选中状态 { "I人": true }
-    },
-    tagOptions: ['I人社恐', 'E人社牛', '宠物友好', '早睡早起', '夜猫子', '爱干净', '不可吸烟', '周末宅家', '喜欢做饭']
+    userInfo: { gender: 1 },
+    tags: {},
+    tagOptions: ['爱干净', '作息规律', '不抽烟', '宠物友好', 'I人', 'E人', '好相处']
   },
-  
-  onChooseAvatar(e) {
-    const { avatarUrl } = e.detail;
-    this.setData({ 'userInfo.avatar': avatarUrl });
-  },
-  onNickNameChange(e) {
-    this.setData({ 'userInfo.nickName': e.detail.value });
-  },
-  onGenderChange(e) {
-    this.setData({ 'userInfo.gender': parseInt(e.detail.value) });
-  },
-  bindInput(e) {
-    const key = e.currentTarget.dataset.key;
-    this.setData({ [`userInfo.${key}`]: e.detail.value });
-  },
+  onChooseAvatar(e) { this.setData({ 'userInfo.avatarUrl': e.detail.avatarUrl }) },
+  onNickNameChange(e) { this.setData({ 'userInfo.nickName': e.detail.value }) },
+  bindInput(e) { this.setData({ 'userInfo.job': e.detail.value }) },
+  setGender(e) { this.setData({ 'userInfo.gender': e.currentTarget.dataset.v }) },
   toggleTag(e) {
-    const tag = e.currentTarget.dataset.tag;
-    const tags = this.data.userInfo.tags;
-    // 切换状态
-    if (tags[tag]) delete tags[tag];
-    else tags[tag] = true;
-    this.setData({ 'userInfo.tags': tags });
+    const t = e.currentTarget.dataset.tag;
+    const tags = this.data.tags;
+    tags[t] ? delete tags[t] : tags[t] = true;
+    this.setData({ tags });
   },
-  saveUserInfo() {
+
+  // 提交到云数据库
+  submitToCloud() {
     const u = this.data.userInfo;
-    // 简单校验
-    if (!u.nickName || !u.gender) {
-      return wx.showToast({ title: '请补全核心信息', icon: 'none' });
-    }
+    if(!u.avatarUrl || !u.nickName) return wx.showToast({title:'请完善信息', icon:'none'});
     
-    // 转换tags为数组以便存储
     const finalData = {
       ...u,
-      tagList: Object.keys(u.tags)
+      tagList: Object.keys(this.data.tags),
+      createTime: db.serverDate() // 服务器时间
     };
-    
-    wx.setStorageSync('my_user_info', finalData);
-    wx.showToast({ title: '注册成功', icon: 'success' });
-    
-    setTimeout(() => {
-      wx.switchTab({ url: '/pages/index/index' });
-    }, 1000);
+
+    wx.showLoading({ title: '注册中...' });
+
+    // 1. 存入 Users 集合
+    db.collection('users').add({
+      data: finalData,
+      success: res => {
+        // 2. 存入本地缓存，方便后续使用
+        finalData._id = res._id; // 记录云端ID
+        wx.setStorageSync('my_user_info', finalData);
+        app.globalData.userInfo = finalData;
+        
+        wx.hideLoading();
+        wx.showToast({ title: '欢迎加入' });
+        setTimeout(() => wx.switchTab({ url: '/pages/index/index' }), 1000);
+      },
+      fail: err => {
+        console.error(err);
+        wx.hideLoading();
+        wx.showToast({ title: '注册失败，请重试', icon: 'none' });
+      }
+    });
   }
 })

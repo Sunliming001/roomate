@@ -1,10 +1,57 @@
-<view class="header">
-  <view class="avatar"></view>
-  <view class="name">租房用户</view>
-</view>
+<view class="container" style="padding-top: {{paddingTop}}px">
+  <!-- 个人卡片 -->
+  <view class="profile-card">
+    <view class="p-top">
+      <image class="avatar" src="{{user.avatar || '/images/default.png'}}"></image>
+      <view class="p-info">
+        <view class="name">{{user.nickName}}</view>
+        <view class="tags">
+           <text wx:for="{{user.tagList}}" wx:key="*this">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
 
-<view class="menu">
-  <view class="item">我的发布</view>
-  <view class="item">我的收藏</view>
-  <view class="item">消息通知 <text class="badge">2</text></view>
+  <!-- 三大模块入口 (点击可切换下方列表) -->
+  <view class="stats-grid">
+    <view class="stat-box {{activeTab=='pub'?'active':''}}" bindtap="switchTab" data-tab="pub">
+      <view class="num">{{stats.pub}}</view>
+      <view class="lbl">我的发布</view>
+    </view>
+    <view class="stat-box {{activeTab=='fav'?'active':''}}" bindtap="switchTab" data-tab="fav">
+      <view class="num">{{stats.fav}}</view>
+      <view class="lbl">我的收藏</view>
+    </view>
+    <view class="stat-box {{activeTab=='contract'?'active':''}}" bindtap="switchTab" data-tab="contract">
+      <view class="num">{{stats.contract}}</view>
+      <view class="lbl">我的签约</view>
+    </view>
+  </view>
+
+  <!-- 详情列表展示区 -->
+  <view class="list-container">
+    <view class="list-title">
+      {{activeTab=='pub'?'发布的房源':(activeTab=='fav'?'收藏的房源':'签约合同')}}
+    </view>
+    
+    <block wx:for="{{listData}}" wx:key="id">
+      <view class="item-card" bindtap="goDetail" data-id="{{item.id}}">
+        <image class="i-img" src="{{item.cover}}" mode="aspectFill"></image>
+        <view class="i-info">
+          <view class="i-title">{{item.community}} {{item.layout.room}}室</view>
+          <view class="i-desc">{{item.desc}}</view>
+          <view class="i-status">
+            <text class="st-tag {{item.status=='signed'?'gray':'red'}}">
+              {{item.status=='signed'?'已签约':'招募中'}}
+            </text>
+            <text class="price">¥{{item.totalPrice}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view wx:if="{{listData.length===0}}" class="empty-tip">
+      暂无相关内容
+    </view>
+  </view>
 </view>

@@ -1,30 +1,46 @@
 <view class="container">
-  <view class="header">
-    <view class="title">完善资料</view>
-    <view class="sub-title">让未来的室友更快认识你</view>
-  </view>
-
-  <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-    <image class="avatar-img" src="{{userInfo.avatar}}" wx:if="{{userInfo.avatar}}" mode="aspectFill"></image>
-    <view class="camera-icon" wx:else>📷</view>
-  </button>
-
-  <view class="form-area">
-    <!-- 其他输入框保持不变，样式已在wxss优化 -->
-    <view class="input-group">
-      <view class="label">昵称</view>
-      <input type="nickname" class="input" placeholder="例如：Momo" bindchange="onNickNameChange"/>
+  <view class="login-card">
+    <view class="header-text">
+      <view class="h1">欢迎来到友邻</view>
+      <view class="h2">完善信息，开启合租之旅</view>
     </view>
-    <!-- ... 剩下的输入代码同上一次 ... -->
-    <view class="input-group">
-      <view class="label">性别</view>
-      <radio-group class="radio-row" bindchange="onGenderChange">
-        <label class="radio"><radio value="1" color="#FF2442"/> 男生</label>
-        <label class="radio"><radio value="2" color="#FF2442"/> 女生</label>
-      </radio-group>
+
+    <!-- 头像 -->
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image class="avatar-img" src="{{userInfo.avatarUrl || ''}}"></image>
+      <view class="cam-icon" wx:if="{{!userInfo.avatarUrl}}">📷</view>
+    </button>
+
+    <!-- 表单 -->
+    <view class="form-area">
+      <view class="input-row">
+        <text class="label">昵称</text>
+        <input type="nickname" class="input" placeholder="请输入昵称" bindchange="onNickNameChange"/>
+      </view>
+
+      <view class="input-row">
+        <text class="label">职业</text>
+        <input class="input" placeholder="例如：设计师" bindinput="bindInput" data-key="job"/>
+      </view>
+
+      <!-- 性别 -->
+      <view class="gender-row">
+        <view class="g-item {{userInfo.gender==1?'active m':''}}" bindtap="setGender" data-v="1">♂ 男生</view>
+        <view class="g-item {{userInfo.gender==2?'active f':''}}" bindtap="setGender" data-v="2">♀ 女生</view>
+      </view>
+
+      <!-- 标签 -->
+      <view class="tags-area">
+        <view class="tag-title">选择标签</view>
+        <view class="tags-flex">
+          <block wx:for="{{tagOptions}}" wx:key="*this">
+            <view class="tag-pill {{tags[item]?'selected':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
+          </block>
+        </view>
+      </view>
     </view>
     
-    <!-- 这里省略其他标签代码，直接复用逻辑即可 -->
-     <button class="save-btn" bindtap="saveUserInfo">进入友邻</button>
+    <!-- 底部按钮 -->
+    <button class="submit-btn" bindtap="submitToCloud">进入友邻</button>
   </view>
 </view>
