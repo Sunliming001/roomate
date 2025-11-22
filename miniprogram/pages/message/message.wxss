@@ -1,38 +1,13 @@
-page { background-color: #F6F6F6; }
-
-.fixed-header {
-  position: fixed; top: 0; left: 0; width: 100%;
-  background: rgba(246, 246, 246, 0.95); /* 半透明背景 */
-  z-index: 99;
-  height: 44px; /* 标准高度 */
-  display: flex; align-items: center; padding-left: 40rpx;
-}
-.page-title { font-size: 40rpx; font-weight: 900; color: #333; }
-
-.msg-list { padding: 0 30rpx; padding-bottom: 200rpx; }
-
-.msg-card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 30rpx;
-  display: flex;
-  align-items: center;
-  margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.03);
-}
-
-.avatar-box { position: relative; margin-right: 24rpx; }
-.msg-avatar { width: 100rpx; height: 100rpx; border-radius: 50%; background: #eee; }
-.red-dot { 
-  position: absolute; top: 0; right: 0; width: 20rpx; height: 20rpx; 
-  background: #FF2442; border-radius: 50%; border: 2rpx solid #fff; 
-}
-
-.msg-content { flex: 1; }
-.m-top { display: flex; justify-content: space-between; margin-bottom: 8rpx; }
-.m-name { font-size: 30rpx; font-weight: bold; color: #333; }
-.m-time { font-size: 22rpx; color: #ccc; }
-.m-desc { font-size: 26rpx; color: #666; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;}
-
-.empty-state { text-align: center; margin-top: 200rpx; color: #999; display: flex; flex-direction: column; }
-.empty-icon { font-size: 80rpx; margin-bottom: 20rpx; }
+page { background: #fff; }
+.header { background: #EDEDED; padding: 20rpx 30rpx; font-weight: bold; border-bottom: 1rpx solid #dcdcdc; position: fixed; width: 100%; z-index: 99; top:0; left:0; height: 44px; display: flex; align-items: center;}
+.chat-list { margin-top: 20rpx; }
+.chat-item { display: flex; padding: 24rpx 30rpx; align-items: center; active: #f0f0f0; }
+.chat-item:active { background: #f5f5f5; }
+.avatar { width: 96rpx; height: 96rpx; border-radius: 10rpx; background: #ddd; margin-right: 24rpx; }
+.content { flex: 1; border-bottom: 1rpx solid #f0f0f0; padding-bottom: 24rpx; }
+.top { display: flex; justify-content: space-between; margin-bottom: 8rpx; }
+.name { font-size: 32rpx; font-weight: 500; color: #000; }
+.time { font-size: 24rpx; color: #ccc; }
+.btm { display: flex; }
+.last-msg { font-size: 26rpx; color: #999; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 500rpx; }
+.empty { text-align: center; color: #999; margin-top: 100rpx; }

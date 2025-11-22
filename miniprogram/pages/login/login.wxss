@@ -1,29 +1,28 @@
 page { background: #F0F2F5; }
-.container { padding: 40rpx; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40rpx; box-sizing: border-box; }
 
-.login-card { width: 100%; background: #fff; border-radius: 32rpx; padding: 40rpx; box-shadow: 0 10rpx 40rpx rgba(0,0,0,0.05); }
+.login-card { width: 100%; background: #fff; border-radius: 32rpx; padding: 40rpx 30rpx; box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.05); }
 
-.header-text { text-align: center; margin-bottom: 40rpx; }
-.h1 { font-size: 44rpx; font-weight: 900; color: #333; margin-bottom: 10rpx; }
-.h2 { font-size: 26rpx; color: #999; }
+.header { text-align: center; margin-bottom: 50rpx; }
+.h1 { font-size: 48rpx; font-weight: 900; color: #333; margin-bottom: 10rpx; }
+.h2 { font-size: 28rpx; color: #999; }
 
-.avatar-btn { width: 160rpx !important; height: 160rpx !important; border-radius: 50%; background: #F5F7FA; margin: 0 auto 40rpx; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 4rpx solid #fff; box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1); }
-.avatar-img { width: 100%; height: 100%; }
-.cam-icon { font-size: 60rpx; color: #CBD5E0; }
+.avatar-wrapper { width: 160rpx !important; height: 160rpx !important; border-radius: 50%; padding: 0; margin: 0 auto 50rpx; background: #F5F7FA; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 4rpx solid #fff; box-shadow: 0 6rpx 16rpx rgba(0,0,0,0.1); }
+.avatar { width: 100%; height: 100%; }
+.cam-icon { font-size: 60rpx; color: #ccc; }
 
-.input-row { margin-bottom: 30rpx; }
-.label { font-size: 28rpx; font-weight: bold; color: #4A5568; margin-bottom: 12rpx; display: block; }
-.input { background: #F7FAFC; height: 88rpx; padding: 0 30rpx; border-radius: 16rpx; font-size: 30rpx; color: #2D3748; }
+.input-group { margin-bottom: 30rpx; }
+.label { font-size: 28rpx; font-weight: bold; color: #333; margin-bottom: 12rpx; display: block; }
+.input { background: #F7FAFC; height: 88rpx; padding: 0 30rpx; border-radius: 16rpx; font-size: 30rpx; color: #333; }
 
 .gender-row { display: flex; gap: 20rpx; margin-bottom: 40rpx; }
-.g-item { flex: 1; height: 80rpx; display: flex; align-items: center; justify-content: center; background: #EDF2F7; border-radius: 16rpx; color: #718096; font-weight: bold; transition: all 0.2s; }
-.g-item.active.m { background: #EBF8FF; color: #3182CE; border: 2rpx solid #3182CE; }
-.g-item.active.f { background: #FFF5F7; color: #D53F8C; border: 2rpx solid #D53F8C; }
+.g-btn { flex: 1; height: 80rpx; display: flex; align-items: center; justify-content: center; background: #F5F7FA; border-radius: 16rpx; color: #666; font-weight: bold; font-size: 30rpx; border: 2rpx solid transparent; transition: all 0.2s; }
+.g-btn.active-m { background: #EBF8FF; color: #3182CE; border-color: #3182CE; }
+.g-btn.active-f { background: #FFF5F7; color: #D53F8C; border-color: #D53F8C; }
 
-.tags-area { margin-bottom: 60rpx; }
-.tag-title { font-size: 28rpx; font-weight: bold; color: #4A5568; margin-bottom: 16rpx; }
-.tags-flex { display: flex; flex-wrap: wrap; gap: 16rpx; }
-.tag-pill { padding: 10rpx 24rpx; background: #EDF2F7; color: #718096; border-radius: 30rpx; font-size: 24rpx; border: 1px solid transparent; }
-.tag-pill.selected { background: #333; color: #fff; transform: scale(1.05); }
+.tags-section { margin-bottom: 50rpx; }
+.tags-list { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.tag { padding: 12rpx 24rpx; background: #F5F7FA; color: #666; border-radius: 30rpx; font-size: 26rpx; border: 1px solid transparent; }
+.tag.selected { background: #333; color: #fff; transform: scale(1.05); font-weight: bold; }
 
-.submit-btn { background: #FF2442; color: #fff; border-radius: 44rpx; font-weight: bold; height: 96rpx; line-height: 96rpx; width: 100% !important; font-size: 32rpx; box-shadow: 0 8rpx 20rpx rgba(255, 36, 66, 0.25); }
+.submit-btn { background: #FF2442; color: #fff; border-radius: 48rpx; font-weight: bold; height: 96rpx; line-height: 96rpx; width: 100% !important; font-size: 34rpx; box-shadow: 0 10rpx 20rpx rgba(255, 36, 66, 0.2); }

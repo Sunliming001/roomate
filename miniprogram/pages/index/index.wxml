@@ -1,68 +1,73 @@
-<view class="page-container">
-  <!-- 1. 固定顶部导航 (适配刘海屏) -->
-  <view class="custom-header" style="padding-top: {{statusBarHeight}}px; height: {{navHeight}}px;">
-    <view class="header-row">
-      <!-- 左侧：城市选择 -->
-      <picker mode="region" level="city" bindchange="onCityChange">
-        <view class="city-picker">
-          <text class="city-name">{{currentCity}}</text>
-          <text class="arrow-down">▾</text>
-        </view>
-      </picker>
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="header" style="padding-top:{{statusBarHeight}}px">
+    <view class="row">
+       <!-- 城市选择 -->
+       <picker mode="region" level="city" bindchange="onCityChange">
+         <view class="city-picker">
+           <text>{{currentCity}}</text>
+           <text class="arrow">▾</text>
+         </view>
+       </picker>
 
-      <!-- 右侧：地图搜索框 -->
-      <view class="search-pill" bindtap="openMapSearch">
-        <icon type="search" size="14" color="#666"></icon>
-        <text class="search-placeholder">{{searchPlaceholder}}</text>
-      </view>
+       <view class="search-box">
+         <icon type="search" size="14"></icon>
+         <input class="search-input" placeholder="搜索小区名称" bindconfirm="onSearch" bindinput="onSearchInput"/>
+       </view>
     </view>
   </view>
 
-  <!-- 2. 占位符 (防止内容被顶部遮挡) -->
-  <view style="height: {{statusBarHeight + navHeight + 10}}px"></view>
+  <!-- 筛选栏 -->
+  <view class="filters" style="top:{{statusBarHeight+44}}px">
+    <picker range="{{['全部','限男生','限女生','不限性别']}}" bindchange="onFilterGender">
+       <view class="tag {{filter.gender>0?'act':''}}">
+         {{['期望性别','限男生','限女生','不限性别'][filter.gender] || '期望性别'}} ▾
+       </view>
+    </picker>
+    <picker range="{{['租金','2k以下','2k-3k','3k以上']}}" bindchange="onFilterPrice">
+       <view class="tag {{filter.priceIdx>0?'act':''}}">
+         {{['租金','2k以下','2k-3k','3k以上'][filter.priceIdx]}} ▾
+       </view>
+    </picker>
+    <view class="tag {{filter.ensuite?'act':''}}" bindtap="toggleEnsuite">独卫</view>
+  </view>
 
-  <!-- 3. 瀑布流内容 -->
-  <view class="waterfall-container">
-    <!-- 左列 -->
+  <view style="height:{{statusBarHeight+44+40}}px"></view>
+
+  <view class="waterfall">
     <view class="col">
-      <block wx:for="{{leftList}}" wx:key="id">
-        <view class="xhs-card" bindtap="goDetail" data-id="{{item.id}}">
-          <image src="{{item.cover}}" mode="widthFix" class="card-img"></image>
-          <view class="card-cont">
-            <view class="card-tit">{{item.community}} {{item.layout.room}}室</view>
-            <view class="card-btm">
-              <view class="usr">
-                <image class="avt" src="{{item.publisher.avatar}}"></image>
-                <text class="nm">{{item.publisher.nickName}}</text>
-              </view>
-              <text class="lk">❤️ {{item.vacantCount}}缺</text>
-            </view>
-          </view>
-        </view>
-      </block>
+      <block wx:for="{{leftList}}" wx:key="_id"><template is="card" data="{{item}}"/></block>
     </view>
-    <!-- 右列 -->
     <view class="col">
-      <block wx:for="{{rightList}}" wx:key="id">
-        <view class="xhs-card" bindtap="goDetail" data-id="{{item.id}}">
-          <image src="{{item.cover}}" mode="widthFix" class="card-img"></image>
-          <view class="card-cont">
-            <view class="card-tit">{{item.community}} {{item.layout.room}}室</view>
-            <view class="card-btm">
-              <view class="usr">
-                <image class="avt" src="{{item.publisher.avatar}}"></image>
-                <text class="nm">{{item.publisher.nickName}}</text>
-              </view>
-              <text class="lk">❤️ {{item.vacantCount}}缺</text>
-            </view>
-          </view>
-        </view>
-      </block>
+      <block wx:for="{{rightList}}" wx:key="_id"><template is="card" data="{{item}}"/></block>
     </view>
   </view>
   
-  <!-- 空状态提示 -->
-  <view wx:if="{{leftList.length === 0 && rightList.length === 0}}" class="empty-tip">
-    暂无该区域房源，快去发布一条吧~
-  </view>
+  <view wx:if="{{leftList.length==0 && rightList.length==0}}" class="empty-tip">暂无房源</view>
 </view>
+
+<!-- 卡片模板 -->
+<template name="card">
+  <view class="card" bindtap="goDetail" data-id="{{item._id}}">
+    <!-- 封面图：只显示招募中房间 -->
+    <image src="{{item.cover}}" mode="aspectFill" class="cover"></image>
+    
+    <view class="info">
+      <view class="tit">{{item.community}}</view>
+      <view class="dots">
+         <block wx:for="{{item.dots}}" wx:key="index">
+            <view class="dot {{item}}"></view>
+         </block>
+         <text class="dist" wx:if="{{item.distStr}}">{{item.distStr}}</text>
+      </view>
+      <view class="btm">
+         <!-- 发布者头像和昵称 -->
+         <view class="pub">
+            <image class="avt" src="{{item.publisher.avatarUrl || '/images/default.png'}}"></image>
+            <text class="nm">{{item.publisher.nickName}}</text>
+         </view>
+         <text class="fav">★ {{item.favCount||0}}</text>
+      </view>
+    </view>
+  </view>
+</template>

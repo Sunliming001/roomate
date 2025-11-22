@@ -12,19 +12,13 @@ Page({
   },
 
   onShow() {
-    const user = mock.getCurrentUser();
-    if(!user) return wx.navigateTo({ url: '/pages/login/login' });
-    
-    this.setData({ 
-      user,
-      stats: {
-        pub: mock.getMyPublish().length,
-        fav: mock.getMyFavs().length,
-        contract: mock.getMyContracts().length
-      }
-    });
-    // 刷新当前列表
-    this.loadList(this.data.activeTab);
+    // 每次进入重新拉取最新用户信息
+    const user = wx.getStorageSync('my_user_info');
+    this.setData({ user });
+    // ... 拉取统计数据 ...
+  },
+  goEdit() {
+    wx.navigateTo({ url: '/pages/profile-edit/profile-edit' });
   },
 
   // 点击切换模块

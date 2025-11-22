@@ -1,69 +1,23 @@
-page { background-color: #F6F6F6; }
-.container { padding: 0 30rpx; padding-bottom: 40rpx; }
-.page-title { font-size: 44rpx; font-weight: 900; color: #333; margin-bottom: 30rpx; }
-
-/* 通用卡片 */
-.card { background: #fff; border-radius: 24rpx; padding: 0 30rpx; margin-bottom: 30rpx; box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.03); }
-
-/* 表单行 */
-.form-row { display: flex; justify-content: space-between; align-items: center; height: 110rpx; border-bottom: 1rpx solid #f5f5f5; }
-.form-row:last-child { border: none; }
-.click-row:active { opacity: 0.7; background: #fafafa; }
-
-.label { font-size: 30rpx; font-weight: bold; color: #333; min-width: 140rpx; }
-.val-box { flex: 1; display: flex; align-items: center; justify-content: flex-end; overflow: hidden;}
-.val-text { font-size: 30rpx; font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400rpx; }
-.val-text.ph { color: #999; font-weight: normal; }
-.loc-icon { margin-right: 10rpx; }
-.arrow { color: #ccc; margin-left: 10rpx; font-family: monospace; font-weight: bold;}
-
-.input-wrap { display: flex; align-items: center; font-size: 28rpx; color: #666; }
-.s-input { width: 80rpx; height: 70rpx; background: #F5F5F7; text-align: center; border-radius: 12rpx; margin: 0 10rpx; font-size: 30rpx; font-weight: bold; color: #333; }
-.s-input.highlight { background: #FFF0F5; color: #FF2442; }
-.l-input { text-align: right; font-size: 32rpx; font-weight: bold; width: 200rpx; }
-
-/* 房间列表标题 */
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20rpx; font-size: 28rpx; font-weight: bold; color: #333; padding: 0 10rpx; }
-.sub-tip { font-size: 24rpx; color: #999; font-weight: normal; }
-
-/* 房间卡片详情 */
-.room-card { padding: 30rpx; transition: all 0.2s; border: 2rpx solid transparent; }
-.room-card.occupied-bg { background: #fafafa; border-color: #eee; opacity: 0.9; }
-
-.room-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
-.room-badge { font-size: 30rpx; font-weight: 900; color: #333; }
-.status-switch { display: flex; align-items: center; }
-.sw-label { font-size: 24rpx; color: #07C160; margin-right: 10rpx; font-weight: bold; }
-.sw-label.occupied-text { color: #999; }
-
-.r-row { display: flex; gap: 20rpx; margin-bottom: 20rpx; }
-.r-field { flex: 1; display: flex; flex-direction: column; }
-.f-label { font-size: 22rpx; color: #999; margin-bottom: 10rpx; }
-.f-input { background: #F9F9F9; height: 72rpx; border-radius: 12rpx; padding: 0 16rpx; font-size: 26rpx; text-align: center; font-weight: bold; color: #333; }
-.f-input.red { color: #FF2442; }
-
-/* 照片上传区域 */
-.photo-box { width: 100%; height: 200rpx; border: 2rpx dashed #ddd; border-radius: 16rpx; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; background: #fff; }
-.preview-img { width: 100%; height: 100%; }
-.re-upload-tip { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5); color: #fff; font-size: 20rpx; text-align: center; padding: 4rpx 0; }
-.upload-placeholder { display: flex; flex-direction: column; align-items: center; color: #ccc; font-size: 24rpx; }
-.cam-icon { font-size: 48rpx; margin-bottom: 8rpx; }
-
-.desc-area { width: 100%; height: 200rpx; padding: 30rpx 0; font-size: 28rpx; line-height: 1.5; color: #333; }
-
-/* 底部按钮 */
-.bottom-bar {
-  position: fixed; bottom: 0; left: 0; width: 100%;
-  background: #fff;
-  box-sizing: border-box;
-  padding: 20rpx 40rpx;
-  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.05);
-  z-index: 99;
-}
-.pub-btn {
-  background: #FF2442; color: #fff; font-weight: bold; 
-  height: 96rpx; line-height: 96rpx; border-radius: 48rpx;
-  width: 100% !important; font-size: 32rpx; margin: 0;
-  box-shadow: 0 8rpx 20rpx rgba(255, 36, 66, 0.2);
-}
+page{background:#F6F6F6; padding:0 30rpx;}
+.card{background:#fff; border-radius:20rpx; padding:0 30rpx; margin-bottom:30rpx;}
+.row{height:100rpx; display:flex; justify-content:space-between; align-items:center; border-bottom:1rpx solid #f5f5f5;}
+.lbl{font-weight:bold;}
+.s-in{width:80rpx; background:#f5f5f5; text-align:center; height:60rpx; margin:0 10rpx; border-radius:8rpx;}
+.s-in.highlight{background:#FFF0F5; color:#FF2442;}
+.room-card{padding:30rpx;}
+.room-card.occ{background:#fafafa;}
+.r-head{display:flex; justify-content:space-between; margin-bottom:20rpx;}
+.badge{font-weight:900; color:#FF2442;}
+.sw-box{font-size:24rpx; color:#999; display:flex; align-items:center;}
+.flex{display:flex; align-items:center;}
+.mb{margin-bottom:20rpx;}
+.m-in{background:#f9f9f9; height:70rpx; text-align:center; flex:1; margin-right:10rpx; border-radius:10rpx; font-size:26rpx;}
+.m-in.red{color:#FF2442; font-weight:bold;}
+.sec-box{background:#f0f2f5; padding:20rpx; border-radius:12rpx; margin-bottom:20rpx;}
+.p-row{display:flex; justify-content:space-between; margin-bottom:10rpx;}
+.sub-form{display:flex; gap:10rpx;}
+.pk-box{background:#fff; padding:10rpx 20rpx; font-size:24rpx; border-radius:8rpx; flex:1; text-align:center; border:1rpx solid #eee;}
+.pk-val{font-weight:bold; color:#333;}
+.photo-upload{width:180rpx; height:240rpx; border:2rpx dashed #ccc; border-radius:12rpx; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#fff;}
+.pv-img{width:100%; height:100%;}
+.pub-btn{position:fixed; bottom:40rpx; left:5%; width:90%; background:#FF2442; color:#fff; border-radius:50rpx; z-index:99;}

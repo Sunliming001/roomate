@@ -1,75 +1,48 @@
 const app = getApp();
 const db = wx.cloud.database();
-
 Page({
   data: {
+    statusBarHeight: app.globalData.statusBarHeight,
     info: {},
-    isFav: false
+    gallery: []
   },
   onLoad(opts) {
-    this.roomId = opts.id;
-    this.getRoomDetail();
-  },
-  
-  // 从云端获取详情
-  getRoomDetail() {
-    db.collection('rooms').doc(this.roomId).get({
+    db.collection('rooms').doc(opts.id).get({
       success: res => {
-        this.setData({ info: res.data });
+        const d = res.data;
+        // 构造相册
+        const gallery = [];
+        d.rooms.forEach(r => {
+          if(r.photos && r.photos.length) {
+            gallery.push({ url: r.photos[0], name: r.name });
+          }
+        });
+        if(gallery.length==0) gallery.push({ url: '/images/default-room.png', name: '暂无照片' });
+        
+        // 处理显示用的入住信息
+        d.rooms.forEach(r => {
+          if(r.status==1) {
+             if(r.isMe) {
+                // 本人：用发布者信息
+                r.occupantDisplay = {
+                   gender: d.publisher.gender == 2 ? 1 : 0, // 0男 1女
+                   age: '房主',
+                   job: d.publisher.job || '未知'
+                };
+             } else {
+                // 非本人：用填写的 occupant
+                r.occupantDisplay = {
+                   gender: r.occupant.genderIndex, // 0男 1女 (对应 publish genderOptions)
+                   age: ['00后','95后','90后'][r.occupant.ageIndex] || '未知',
+                   job: r.occupant.job || '未知'
+                };
+             }
+          }
+        });
+
+        this.setData({ info: d, gallery });
       }
     });
   },
-
-  // 发起聊一聊 (核心逻辑)
-  goChat() {
-    const me = app.globalData.userInfo;
-    const owner = this.data.info.publisher;
-
-    if (me._id === owner._id) {
-        return wx.showToast({ title: '这是你自己的房源', icon: 'none' });
-    }
-
-    wx.showLoading({ title: '建立会话...' });
-
-    // 1. 检查是否已经存在会话
-    db.collection('chats').where({
-      // 查询包含 我 和 房主 的会话 (需配合云数据库查询指令，简化起见这里用 roomID 查询)
-      roomId: this.roomId,
-      // 实际生产中应该更严谨地查询 members 数组
-    }).get({
-      success: res => {
-        if (res.data.length > 0) {
-          // 已存在，直接跳转
-          const chatId = res.data[0]._id;
-          this.navToChat(chatId);
-        } else {
-          // 不存在，创建新会话
-          this.createChat(me, owner);
-        }
-      }
-    });
-  },
-
-  createChat(me, owner) {
-    db.collection('chats').add({
-      data: {
-        roomId: this.roomId,
-        roomName: this.data.info.community,
-        members: [me, owner], // 存入双方信息
-        lastMessage: '会话已创建',
-        updateTime: db.serverDate()
-      },
-      success: res => {
-        this.navToChat(res._id);
-      }
-    });
-  },
-
-  navToChat(chatId) {
-    wx.hideLoading();
-    // 跳转到聊天页
-    wx.navigateTo({ url: `/pages/chat/chat?id=${chatId}&name=${this.data.info.community}` });
-  },
-
-  // ... (其他收藏、加入逻辑需适配 cloud database，此处略，原理同上) ...
+  goBack() { wx.navigateBack(); }
 })

@@ -1,66 +1,50 @@
-// pages/profile-edit/profile-edit.js
+const app = getApp();
+const db = wx.cloud.database();
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    paddingTop: (app.globalData?.statusBarHeight || 20) + 10,
+    userInfo: {},
+    tags: {},
+    tagOptions: ['作息规律', '爱干净', '不抽烟', '宠物友好', 'I人', 'E人', '喜欢做饭', '夜猫子']
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-
+  onLoad() {
+    const u = wx.getStorageSync('my_user_info') || {};
+    const tagsMap = {};
+    if(u.tagList) u.tagList.forEach(t => tagsMap[t] = true);
+    this.setData({ userInfo: u, tags: tagsMap });
   },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
+  onChooseAvatar(e) { this.setData({ 'userInfo.avatarUrl': e.detail.avatarUrl }) },
+  onNickNameChange(e) { this.setData({ 'userInfo.nickName': e.detail.value }) },
+  bindInput(e) { this.setData({ [`userInfo.${e.currentTarget.dataset.key}`]: e.detail.value }) },
+  onGenderChange(e) { this.setData({ 'userInfo.gender': parseInt(e.detail.value) }) },
+  toggleTag(e) {
+    const t = e.currentTarget.dataset.tag;
+    const tags = this.data.tags;
+    tags[t] ? delete tags[t] : tags[t] = true;
+    this.setData({ tags });
   },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+  save() {
+    wx.showLoading({title: '保存中'});
+    const u = this.data.userInfo;
+    u.tagList = Object.keys(this.data.tags);
+    
+    // 更新云端
+    db.collection('users').doc(u._id).update({
+      data: {
+        avatarUrl: u.avatarUrl,
+        nickName: u.nickName,
+        job: u.job,
+        gender: u.gender,
+        tagList: u.tagList
+      },
+      success: res => {
+        wx.setStorageSync('my_user_info', u);
+        app.globalData.userInfo = u;
+        wx.hideLoading();
+        wx.showToast({title: '保存成功'});
+        setTimeout(() => wx.navigateBack(), 1000);
+      }
+    });
   }
 })

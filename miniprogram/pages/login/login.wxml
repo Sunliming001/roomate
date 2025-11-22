@@ -1,46 +1,46 @@
 <view class="container">
   <view class="login-card">
-    <view class="header-text">
+    <view class="header">
       <view class="h1">欢迎来到友邻</view>
-      <view class="h2">完善信息，开启合租之旅</view>
+      <view class="h2">完善信息，遇见合拍室友</view>
     </view>
 
     <!-- 头像 -->
-    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-      <image class="avatar-img" src="{{userInfo.avatarUrl || ''}}"></image>
+    <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image class="avatar" src="{{userInfo.avatarUrl || ''}}"></image>
       <view class="cam-icon" wx:if="{{!userInfo.avatarUrl}}">📷</view>
     </button>
 
-    <!-- 表单 -->
-    <view class="form-area">
-      <view class="input-row">
-        <text class="label">昵称</text>
+    <view class="form-box">
+      <!-- 昵称 -->
+      <view class="input-group">
+        <view class="label">昵称</view>
         <input type="nickname" class="input" placeholder="请输入昵称" bindchange="onNickNameChange"/>
       </view>
 
-      <view class="input-row">
-        <text class="label">职业</text>
-        <input class="input" placeholder="例如：设计师" bindinput="bindInput" data-key="job"/>
+      <!-- 职业 -->
+      <view class="input-group">
+        <view class="label">职业</view>
+        <input class="input" placeholder="例如：产品经理" bindinput="bindInput" data-key="job"/>
       </view>
 
       <!-- 性别 -->
       <view class="gender-row">
-        <view class="g-item {{userInfo.gender==1?'active m':''}}" bindtap="setGender" data-v="1">♂ 男生</view>
-        <view class="g-item {{userInfo.gender==2?'active f':''}}" bindtap="setGender" data-v="2">♀ 女生</view>
+        <view class="g-btn {{userInfo.gender==1?'active-m':''}}" bindtap="setGender" data-v="1">♂ 男生</view>
+        <view class="g-btn {{userInfo.gender==2?'active-f':''}}" bindtap="setGender" data-v="2">♀ 女生</view>
       </view>
 
       <!-- 标签 -->
-      <view class="tags-area">
-        <view class="tag-title">选择标签</view>
-        <view class="tags-flex">
+      <view class="tags-section">
+        <view class="label">个人标签</view>
+        <view class="tags-list">
           <block wx:for="{{tagOptions}}" wx:key="*this">
-            <view class="tag-pill {{tags[item]?'selected':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
+            <view class="tag {{tags[item]?'selected':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
           </block>
         </view>
       </view>
     </view>
-    
-    <!-- 底部按钮 -->
-    <button class="submit-btn" bindtap="submitToCloud">进入友邻</button>
+
+    <button class="submit-btn" bindtap="submit">进入友邻</button>
   </view>
 </view>

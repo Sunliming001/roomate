@@ -2,13 +2,16 @@
   <!-- 个人卡片 -->
   <view class="profile-card">
     <view class="p-top">
-      <image class="avatar" src="{{user.avatar || '/images/default.png'}}"></image>
+      <!-- 显示当前头像，如果没有则显示默认 -->
+      <image class="avatar" src="{{user.avatarUrl || '/images/default.png'}}"></image>
       <view class="p-info">
-        <view class="name">{{user.nickName}}</view>
+        <view class="name">{{user.nickName || '未登录'}}</view>
         <view class="tags">
            <text wx:for="{{user.tagList}}" wx:key="*this">{{item}}</text>
         </view>
       </view>
+      <!-- 修改资料入口 -->
+      <view class="edit-btn" bindtap="goEdit">修改资料 ></view>
     </view>
   </view>
 

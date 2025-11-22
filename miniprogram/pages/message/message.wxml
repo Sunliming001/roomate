@@ -1,30 +1,21 @@
 <view class="container" style="padding-top: {{paddingTop}}px">
-  <!-- 固定标题栏 -->
-  <view class="fixed-header" style="padding-top: {{paddingTop - 44}}px">
-    <view class="page-title">消息中心</view>
-  </view>
-
-  <view class="msg-list">
-    <block wx:for="{{list}}" wx:key="index">
-      <view class="msg-card" bindtap="goChat" data-id="{{item.id}}" data-name="{{item.title}}">
-        <view class="avatar-box">
-          <image class="msg-avatar" src="{{item.avatar || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100'}}" mode="aspectFill"></image>
-          <view class="red-dot" wx:if="{{!item.read}}"></view>
-        </view>
-        <view class="msg-content">
-          <view class="m-top">
-            <text class="m-name">{{item.title}}</text>
-            <text class="m-time">{{item.time}}</text>
+  <view class="header">微信(仿)</view>
+  
+  <view class="chat-list">
+    <block wx:for="{{list}}" wx:key="_id">
+      <view class="chat-item" bindtap="goChat" data-id="{{item._id}}" data-name="{{item.roomName}}">
+        <image class="avatar" src="{{item.targetAvatar || '/images/default.png'}}"></image>
+        <view class="content">
+          <view class="top">
+            <text class="name">{{item.roomName}}</text>
+            <text class="time">{{item.timeStr}}</text>
           </view>
-          <view class="m-desc">{{item.content}}</view>
+          <view class="btm">
+            <text class="last-msg">{{item.lastMessage}}</text>
+          </view>
         </view>
       </view>
     </block>
-    
-    <!-- 空状态 -->
-    <view wx:if="{{list.length === 0}}" class="empty-state">
-      <text class="empty-icon">📭</text>
-      <text>暂无新消息</text>
-    </view>
+    <view wx:if="{{list.length==0}}" class="empty">暂无消息</view>
   </view>
 </view>

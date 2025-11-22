@@ -1,2 +1,37 @@
-<!--pages/profile-edit/profile-edit.wxml-->
-<text>pages/profile-edit/profile-edit.wxml</text>
+<view class="container" style="padding-top: {{paddingTop}}px">
+  <view class="page-title">编辑个人资料</view>
+
+  <view class="form-card">
+    <button class="avatar-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <text class="label">头像</text>
+      <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
+      <text class="arrow">></text>
+    </button>
+    
+    <view class="input-row">
+      <text class="label">昵称</text>
+      <input class="val-input" type="nickname" value="{{userInfo.nickName}}" bindchange="onNickNameChange"/>
+    </view>
+
+    <view class="input-row">
+      <text class="label">职业</text>
+      <input class="val-input" value="{{userInfo.job}}" bindinput="bindInput" data-key="job" placeholder="请填写职业"/>
+    </view>
+
+    <view class="input-row">
+      <text class="label">性别</text>
+      <picker range="{{['未知','男','女']}}" value="{{userInfo.gender}}" bindchange="onGenderChange">
+        <view class="picker-val">{{['未知','男','女'][userInfo.gender]}} ></view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="section-title">个人标签</view>
+  <view class="tags-area">
+    <block wx:for="{{tagOptions}}" wx:key="*this">
+      <view class="tag {{tags[item]?'active':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
+    </block>
+  </view>
+
+  <button class="save-btn" bindtap="save">保存修改</button>
+</view>
