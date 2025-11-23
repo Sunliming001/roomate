@@ -11,12 +11,15 @@ Page({
     listData: []
   },
 
+  // ...
   onShow() {
     const user = wx.getStorageSync('my_user_info');
     if(!user) return wx.navigateTo({ url: '/pages/login/login' });
     this.setData({ user });
     this.loadAllData();
+    app.checkTabBarBadge(); // 检查红点
   },
+// ...
 
   onPullDownRefresh() {
     this.loadAllData(() => wx.stopPullDownRefresh());

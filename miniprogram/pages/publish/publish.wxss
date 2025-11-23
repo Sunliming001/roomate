@@ -1,3 +1,4 @@
+/* ... 之前的 CSS 保持不变，替换/新增以下部分 ... */
 /* 全局盒模型修复，防止 padding 撑大宽度 */
 page { 
   background: #F6F6F6; 
@@ -223,3 +224,31 @@ view, text, input, picker, textarea {
   margin: 0;
   box-shadow: 0 8rpx 20rpx rgba(255, 36, 66, 0.2);
 }
+/* 新增：Grid 布局表单 */
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+.grid-item {
+  background: #fff;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.input-item {
+  grid-column: span 2; /* 职业栏跨两列 */
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 16rpx 30rpx;
+}
+.g-lbl { font-size: 22rpx; color: #999; margin-bottom: 6rpx; }
+.input-item .g-lbl { margin-bottom: 0; margin-right: 20rpx; }
+.g-val { font-weight: bold; font-size: 28rpx; color: #333; }
+.g-in { text-align: right; font-weight: bold; font-size: 28rpx; flex: 1;}
+
+.ensuite { display: flex; align-items: center; font-size: 24rpx; color: #666; gap: 10rpx; width: 100%; justify-content: flex-end;}

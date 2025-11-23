@@ -27,6 +27,7 @@ Page({
            wx.reLaunch({ url: '/pages/login/login' });
         }
       }, 500);
+      app.checkTabBarBadge();
       return;
     }
 

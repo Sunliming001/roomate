@@ -1,24 +1,30 @@
 <view class="container" style="padding-top: {{paddingTop}}px">
   <view class="page-title">发布找舍友</view>
+  
+  <!-- 基础信息 -->
   <view class="card">
     <view class="row click" bindtap="chooseLocation">
       <text class="lbl">小区地点</text>
-      <text class="val">{{formData.community || '点击选择'}}</text>
+      <view class="val-box">
+         <text class="val-txt {{formData.community?'':'ph'}}">{{formData.community || '点击选择'}}</text>
+         <text class="arrow">></text>
+      </view>
     </view>
     <view class="row">
       <text class="lbl">户型</text>
       <view class="flex">
-        <input class="s-in" type="number" placeholder="3" bindinput="onRoomCountInput" /> 室
+        <input class="s-in" type="number" placeholder="3" bindinput="onRoomCountInput" value="{{formData.layout.room}}"/> 室
         <input class="s-in" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.hall"/> 厅
         <input class="s-in" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.toilet"/> 卫
       </view>
     </view>
     <view class="row">
       <text class="lbl">总租金</text>
-      <input class="val" style="text-align:right" type="digit" placeholder="0" bindinput="bindInput" data-path="formData.totalPrice"/>
+      <input class="val-in" type="digit" placeholder="0" bindinput="bindInput" data-path="formData.totalPrice" value="{{formData.totalPrice}}"/>
     </view>
   </view>
 
+  <!-- 房间列表 -->
   <block wx:for="{{formData.rooms}}" wx:key="index">
     <view class="card room-card {{item.status==1?'occ':''}}">
       <view class="r-head">
@@ -33,42 +39,52 @@
         <view class="flex mb">
           <input class="m-in" placeholder="名称(主卧)" value="{{item.name}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="name"/>
           <input class="m-in" placeholder="面积㎡" type="digit" value="{{item.area}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="area"/>
-          <view class="ensuite" bindtap="toggleEnsuite">
-             <text>独卫</text>
+          <!-- 修复：无论招募还是入住，都需要填租金以便校验总和 -->
+          <input class="m-in red" type="digit" placeholder="租金" value="{{item.price}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="price"/>
+        </view>
+        <view class="flex mb">
+           <view class="ensuite" bindtap="toggleEnsuite">
+             <text>独立卫生间</text>
              <switch scale="0.6" checked="{{item.hasEnsuite}}" bindchange="toggleEnsuite" data-idx="{{index}}"/>
-          </view>
+           </view>
         </view>
 
-        <!-- 状态：已入住 -->
+        <!-- 已入住状态 -->
         <view wx:if="{{item.status==1}}" class="sec-box">
            <view class="p-row">
              <text>是否本人入住</text>
-             <picker range="{{isMeOptions}}" value="{{item.isMeIndex}}" bindchange="onIsMeChange" data-idx="{{index}}">
-               <view class="pk-val">{{isMeOptions[item.isMeIndex]}} ▾</view>
+             <picker range="{{['是','否']}}" value="{{item.isMeIndex}}" bindchange="onIsMeChange" data-idx="{{index}}">
+               <view class="pk-val">{{['是','否'][item.isMeIndex]}} ▾</view>
              </picker>
            </view>
-           <!-- 否：填详情 -->
-           <view wx:if="{{item.isMeIndex==1}}" class="sub-form">
+           
+           <!-- 否：显示规整的 Grid UI -->
+           <view wx:if="{{item.isMeIndex==1}}" class="grid-form">
              <picker range="{{genderOptions}}" value="{{item.occupant.genderIndex}}" bindchange="onOccGenderChange" data-idx="{{index}}">
-                <view class="pk-box">性别: {{genderOptions[item.occupant.genderIndex]}} ▾</view>
+                <view class="grid-item">
+                   <text class="g-lbl">性别</text>
+                   <text class="g-val">{{genderOptions[item.occupant.genderIndex]}} ▾</text>
+                </view>
              </picker>
              <picker range="{{ageOptions}}" value="{{item.occupant.ageIndex}}" bindchange="onOccAgeChange" data-idx="{{index}}">
-                <view class="pk-box">年龄: {{ageOptions[item.occupant.ageIndex]}} ▾</view>
+                <view class="grid-item">
+                   <text class="g-lbl">年龄</text>
+                   <text class="g-val">{{ageOptions[item.occupant.ageIndex]}} ▾</text>
+                </view>
              </picker>
-             <input class="pk-box input" placeholder="职业" value="{{item.occupant.job}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="occupant.job"/>
+             <view class="grid-item input-item">
+                <text class="g-lbl">职业</text>
+                <input class="g-in" placeholder="请输入" value="{{item.occupant.job}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="occupant.job"/>
+             </view>
            </view>
         </view>
 
-        <!-- 状态：招募中 -->
+        <!-- 招募中状态 -->
         <view wx:if="{{item.status==0}}" class="sec-box">
-           <view class="flex mb">
-              <text>租金</text>
-              <input class="m-in red" type="digit" placeholder="2000" value="{{item.price}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="price"/>
-           </view>
            <view class="flex">
               <text>期望性别</text>
-              <picker range="{{expectGenderOptions}}" value="{{item.expectGender}}" bindchange="onExpectGenderChange" data-idx="{{index}}">
-                 <view class="pk-val">{{expectGenderOptions[item.expectGender]}} ▾</view>
+              <picker range="{{['不限','男','女']}}" value="{{item.expectGender}}" bindchange="onExpectGenderChange" data-idx="{{index}}">
+                 <view class="pk-val">{{['不限','男','女'][item.expectGender]}} ▾</view>
               </picker>
            </view>
         </view>
@@ -82,5 +98,5 @@
   </block>
 
   <view style="height:200rpx"></view>
-  <button class="pub-btn" bindtap="submit">发布</button>
+  <button class="pub-btn" bindtap="submit">发布找舍友</button>
 </view>

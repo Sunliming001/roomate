@@ -2,12 +2,12 @@
   <view class="tabs">
     <view class="tab {{curTab==0?'active':''}}" bindtap="switchTab" data-idx="0">
       聊天
-      <!-- 聊天总红点 -->
+      <!-- 顶部聊天 Tab 红点 (逻辑2) -->
       <view class="dot" wx:if="{{hasUnreadChat}}"></view>
     </view>
     <view class="tab {{curTab==1?'active':''}}" bindtap="switchTab" data-idx="1">
       通知 
-      <!-- 通知总红点 -->
+      <!-- 顶部通知 Tab 红点 (逻辑3) -->
       <view class="dot" wx:if="{{hasUnreadNotif}}"></view>
     </view>
   </view>
@@ -18,7 +18,7 @@
       <view class="chat-item" bindtap="goChat" data-id="{{item._id}}" data-name="{{item.roomName}}">
         <view class="avatar-box">
            <image class="avatar" src="{{item.targetAvatar}}"></image>
-           <!-- 单个聊天红点 -->
+           <!-- 聊天框右上角小红点 (逻辑1) -->
            <view class="red-badge" wx:if="{{item.hasUnread}}"></view>
         </view>
         <view class="content">
@@ -38,10 +38,11 @@
   <!-- 通知列表 -->
   <view wx:if="{{curTab==1}}" class="list-box">
     <block wx:for="{{notifList}}" wx:key="_id">
-      <!-- 普通通知 (点击消除红点) -->
+      <!-- 普通通知 -->
       <view class="notif-card simple" wx:if="{{item.type !== 'join_req'}}" bindtap="readNotification" data-id="{{item._id}}" data-read="{{item.isRead}}">
         <view class="n-icon">
            {{item.icon}}
+           <!-- 通知项红点 -->
            <view class="mini-dot" wx:if="{{!item.isRead}}"></view>
         </view>
         <view class="n-info">
@@ -51,7 +52,7 @@
         </view>
       </view>
 
-      <!-- 申请通知 (点击展开或操作时消除红点) -->
+      <!-- 申请通知 -->
       <view class="notif-card req" wx:if="{{item.type === 'join_req'}}">
         <view class="req-head">
            <text class="rh-t">申请加入 <text class="mini-dot" wx:if="{{!item.isRead}}"></text></text>
@@ -66,7 +67,6 @@
            <text class="view-dtl">查看详情 ></text>
         </view>
         <view class="req-actions" wx:if="{{item.status=='pending'}}">
-           <!-- 操作按钮点击同时触发“已读”逻辑 -->
            <button class="btn reject" size="mini" bindtap="handleReq" data-id="{{item._id}}" data-act="reject" data-idx="{{index}}">拒绝</button>
            <button class="btn agree" size="mini" bindtap="handleReq" data-id="{{item._id}}" data-act="agree" data-idx="{{index}}">同意</button>
         </view>
