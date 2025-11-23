@@ -2,26 +2,30 @@
   <!-- 顶部导航 -->
   <view class="header" style="padding-top:{{statusBarHeight}}px">
     <view class="row">
-       <!-- 城市选择 -->
-       <picker mode="region" level="city" bindchange="onCityChange">
-         <view class="city-picker">
-           <text>{{currentCity}}</text>
-           <text class="arrow">▾</text>
-         </view>
-       </picker>
+       <!-- 修复：点击跳转城市选择页 -->
+       <view class="city-picker" bindtap="toCityPage">
+         <text>{{currentCity}}</text>
+         <text class="arrow">▾</text>
+       </view>
 
-       <view class="search-box">
+       <!-- 搜索框 -->
+       <view class="search-box" bindtap="onSearchTap">
          <icon type="search" size="14"></icon>
-         <input class="search-input" placeholder="搜索小区名称" bindconfirm="onSearch" bindinput="onSearchInput"/>
+         <input class="search-input" 
+                placeholder="点击搜索小区位置" 
+                value="{{searchKeyword}}" 
+                disabled="true" 
+         />
+         <view wx:if="{{searchKeyword}}" catchtap="clearSearch" class="clear-icon">×</view>
        </view>
     </view>
   </view>
 
-  <!-- 筛选栏 -->
+  <!-- 下方筛选和列表保持不变，请保留原代码 ... -->
   <view class="filters" style="top:{{statusBarHeight+44}}px">
-    <picker range="{{['全部','限男生','限女生','不限性别']}}" bindchange="onFilterGender">
+    <picker range="{{['全部','招男','招女','不限']}}" bindchange="onFilterGender">
        <view class="tag {{filter.gender>0?'act':''}}">
-         {{['期望性别','限男生','限女生','不限性别'][filter.gender] || '期望性别'}} ▾
+         {{['期望性别','招男','招女','不限'][filter.gender] || '期望性别'}} ▾
        </view>
     </picker>
     <picker range="{{['租金','2k以下','2k-3k','3k以上']}}" bindchange="onFilterPrice">
@@ -43,15 +47,13 @@
     </view>
   </view>
   
-  <view wx:if="{{leftList.length==0 && rightList.length==0}}" class="empty-tip">暂无房源</view>
+  <view wx:if="{{leftList.length==0 && rightList.length==0}}" class="empty-tip">当前城市暂无符合条件的房源</view>
 </view>
 
-<!-- 卡片模板 -->
+<!-- 卡片模板保持不变 -->
 <template name="card">
   <view class="card" bindtap="goDetail" data-id="{{item._id}}">
-    <!-- 封面图：只显示招募中房间 -->
     <image src="{{item.cover}}" mode="aspectFill" class="cover"></image>
-    
     <view class="info">
       <view class="tit">{{item.community}}</view>
       <view class="dots">
@@ -61,7 +63,6 @@
          <text class="dist" wx:if="{{item.distStr}}">{{item.distStr}}</text>
       </view>
       <view class="btm">
-         <!-- 发布者头像和昵称 -->
          <view class="pub">
             <image class="avt" src="{{item.publisher.avatarUrl || '/images/default.png'}}"></image>
             <text class="nm">{{item.publisher.nickName}}</text>

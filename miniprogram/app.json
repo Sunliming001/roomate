@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/city/city", 
     "pages/message/message",
     "pages/chat/chat",
     "pages/publish/publish",

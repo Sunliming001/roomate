@@ -1,0 +1,37 @@
+<view class="container" style="padding-top: {{paddingTop}}px">
+  <!-- 顶部标题 -->
+  <view class="nav-bar">
+    <view class="back" bindtap="goBack">✕</view>
+    <view class="title">选择城市</view>
+  </view>
+
+  <!-- 当前定位 -->
+  <view class="section">
+    <view class="sec-title">当前定位</view>
+    <view class="grid-row">
+      <view class="city-tag location" bindtap="reLocate">
+        <text class="icon">📍</text> {{currentCity || '定位中...'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门城市 -->
+  <view class="section">
+    <view class="sec-title">热门城市</view>
+    <view class="grid-box">
+      <block wx:for="{{hotCities}}" wx:key="*this">
+        <view class="city-tag" bindtap="selectCity" data-city="{{item}}">{{item}}</view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 其他城市 (调用原生选择器兜底) -->
+  <view class="section">
+    <view class="sec-title">其他城市</view>
+    <picker mode="region" level="city" bindchange="onPickerChange">
+      <view class="picker-btn">
+        选择其他省市... <text class="arrow">></text>
+      </view>
+    </picker>
+  </view>
+</view>
