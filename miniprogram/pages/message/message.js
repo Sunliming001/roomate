@@ -9,14 +9,14 @@ Page({
     chatList: [],
     notifList: [],
     hasUnreadChat: false,
-    hasUnreadNotif: false,
-    unreadCount: 0
+    hasUnreadNotif: false
   },
 
   // 临时ID防止闪烁
   justClickedChatId: null,
 
   onShow() {
+    console.log('[调试-消息页] onShow 触发');
     this.loadData();
   },
 
@@ -28,20 +28,31 @@ Page({
     const p1 = this.loadChats();
     const p2 = this.loadNotifications();
     Promise.all([p1, p2]).then(() => {
-      if (this.data.hasUnreadChat || this.data.hasUnreadNotif) {
-        wx.showTabBarRedDot({ index: 1 });
-      } else {
-        wx.hideTabBarRedDot({ index: 1 });
-      }
+      this.updateTabBarStatus();
       if (cb) cb();
     });
+  },
+
+  updateTabBarStatus() {
+    const hasChat = this.data.chatList.some(item => item.hasUnread);
+    const hasNotif = this.data.notifList.some(item => !item.isRead);
+    
+    this.setData({
+        hasUnreadChat: hasChat,
+        hasUnreadNotif: hasNotif
+    });
+
+    if (hasChat || hasNotif) {
+        wx.showTabBarRedDot({ index: 1 });
+    } else {
+        wx.hideTabBarRedDot({ index: 1 });
+    }
   },
 
   switchTab(e) {
     this.setData({ curTab: e.currentTarget.dataset.idx });
   },
 
-  // 1. 加载聊天列表 (确保 lastMessage 被读取)
   loadChats() {
     const user = wx.getStorageSync('my_user_info');
     return db.collection('chats').where({
@@ -49,47 +60,49 @@ Page({
       })
       .orderBy('updateTime', 'desc').get()
       .then(res => {
-        let hasUnreadAny = false;
+        console.log('[调试-加载聊天] 数据库返回:', res.data.length);
         
         const list = res.data.map(i => {
-          let isUnread = false;
-          if (i.unreadMembers && i.unreadMembers.includes(user._id)) {
-            isUnread = true;
+          // 1. 安全获取未读数组
+          let rawUnread = i.unreadMembers || [];
+          
+          // 2. 判断是否未读
+          let isUnread = rawUnread.includes(user._id);
+          
+          // 3. 本地防闪烁：如果该ID是刚刚点击过的，强制设为已读
+          if (i._id === this.justClickedChatId) {
+             isUnread = false;
           }
-          // 强制覆盖刚点击的
-          if (i._id === this.justClickedChatId) isUnread = false;
-          if (isUnread) hasUnreadAny = true;
+
+          // 调试日志
+          if (isUnread) {
+              console.warn(`[调试] 发现红点: ${i.roomName}, 未读列表:`, rawUnread);
+          }
           
           return {
             ...i,
             timeStr: '刚刚', 
             targetAvatar: i.targetAvatar || '/images/default-room.png',
-            hasUnread: isUnread,
-            // 核心：这里直接读取数据库的 lastMessage
+            hasUnread: isUnread, 
             lastMessage: i.lastMessage || '[图片]' 
           };
         });
 
-        this.setData({ chatList: list, hasUnreadChat: hasUnreadAny });
+        this.setData({ chatList: list });
         
+        // 稍微延迟清空临时ID
         if (this.justClickedChatId) {
-            setTimeout(() => { this.justClickedChatId = null; }, 500);
+            setTimeout(() => { this.justClickedChatId = null; }, 800);
         }
       });
   },
 
-  // 2. 加载通知 (保持不变)
   loadNotifications() {
     const user = wx.getStorageSync('my_user_info');
-    return db.collection('notifications').where({
-        targetUserId: user._id
-      })
+    return db.collection('notifications').where({ targetUserId: user._id })
       .orderBy('createTime', 'desc').get()
       .then(res => {
-        let hasUnreadAny = false;
         const list = res.data.map(i => {
-          if (!i.isRead) hasUnreadAny = true;
-          
           let title = '系统通知', icon = '🔔';
           if (i.type == 'fav') { title = '收到了新收藏'; icon = '⭐'; }
           if (i.type == 'join_result') { title = '申请结果通知'; icon = '📝'; }
@@ -98,7 +111,7 @@ Page({
           
           return { ...i, title, icon, timeStr: '刚刚' };
         });
-        this.setData({ notifList: list, hasUnreadNotif: hasUnreadAny });
+        this.setData({ notifList: list });
       });
   },
 
@@ -106,18 +119,27 @@ Page({
     const { id, name } = e.currentTarget.dataset;
     const user = wx.getStorageSync('my_user_info');
 
+    console.log('[调试-点击] 进入聊天:', name);
+    
+    // 1. 记录ID，防止返回时红点复活
     this.justClickedChatId = id;
 
+    // 2. 本地立即消红点
     const idx = this.data.chatList.findIndex(c => c._id === id);
     if (idx > -1) {
         const upKey = `chatList[${idx}].hasUnread`;
         this.setData({ [upKey]: false });
+        this.updateTabBarStatus(); // 更新底部Tab状态
     }
 
+    // 3. 数据库异步消红点
     db.collection('chats').doc(id).update({
       data: { unreadMembers: _.pull(user._id) }
+    }).then(() => {
+        console.log('[调试] 数据库红点消除请求成功');
     }).catch(console.error);
 
+    // 4. 跳转
     wx.navigateTo({
       url: `/pages/chat/chat?id=${id}&name=${name}`
     });
@@ -151,16 +173,14 @@ Page({
          const rooms = roomData.rooms;
          
          if (rooms[req.roomIdx].status == 1) {
-            wx.hideLoading();
-            return wx.showToast({title:'该房间已被占', icon:'none'});
+            wx.hideLoading(); return wx.showToast({title:'该房间已被占', icon:'none'});
          }
 
-         rooms[req.roomIdx].status = 1;
-         rooms[req.roomIdx].isMeIndex = 1;
+         rooms[req.roomIdx].status = 1; 
+         rooms[req.roomIdx].isMeIndex = 1; 
          rooms[req.roomIdx].occupant = {
-            genderIndex: req.sender.gender == 2 ? 1 : 0,
-            ageIndex: 4,
-            job: req.sender.job || '保密'
+            genderIndex: req.sender.gender == 2 ? 1 : 0, 
+            ageIndex: 4, job: req.sender.job || '保密'
          };
 
          const isFull = rooms.every(r => r.status == 1);

@@ -11,25 +11,24 @@ Page({
     inputVal: '',
     scrollId: '',
     chatInfo: null,
-    memberMap: {} // 缓存成员信息 { id: { nickName: 'xx', avatarUrl: 'xx' } }
+    memberMap: {} 
   },
 
   onLoad(opts) {
     this.setData({ chatId: opts.id, title: opts.name || '交流群' });
     this.userInfo = wx.getStorageSync('my_user_info');
-    
+    console.log('[调试-Chat] 进入页面, 我的ID:', this.userInfo._id);
     this.initChat();
   },
 
   initChat() {
     db.collection('chats').doc(this.data.chatId).get().then(res => {
+      console.log('[调试-Chat] 获取聊天室详情:', res.data);
       this.setData({ chatInfo: res.data });
-      
-      // 1. 获取成员信息 (为了显示 "张三已读")
       this.fetchMemberInfo(res.data.members);
 
-      // 2. 进场即读：把自己从未读列表移除 (消除消息列表页的红点)
       if (res.data.unreadMembers && res.data.unreadMembers.includes(this.userInfo._id)) {
+        console.log('[调试-Chat] 进场消除红点');
         db.collection('chats').doc(this.data.chatId).update({
           data: { unreadMembers: _.pull(this.userInfo._id) }
         });
@@ -38,121 +37,114 @@ Page({
   },
 
   fetchMemberInfo(memberIds) {
-    db.collection('users').where({
-      _id: _.in(memberIds)
-    }).get().then(res => {
+    db.collection('users').where({ _id: _.in(memberIds) }).get().then(res => {
       const map = {};
       res.data.forEach(u => { map[u._id] = u; });
       this.setData({ memberMap: map });
-      // 获取完名字后再启动监听，确保能显示名字
       this.watchMessages();
     }).catch(err => {
-      console.error('获取成员失败', err);
-      this.watchMessages(); // 失败也要启动监听
+      this.watchMessages(); 
     });
   },
 
-  // --- 核心：实时消息监听与已读标记 ---
   watchMessages() {
     const that = this;
+    if(this.watcher) this.watcher.close();
+
     this.watcher = db.collection('messages')
       .where({ chatId: that.data.chatId })
       .orderBy('createTime', 'asc')
       .watch({
         onChange: function(snapshot) {
           if (!snapshot.docs) return;
-          
           const msgs = snapshot.docs;
           const myId = that.userInfo._id;
-          
-          // 1. 筛选出需要我标记为"已读"的消息
-          // 条件：不是我发的 && readBy数组里还没有我
-          const unreadIds = [];
+          const idsToMarkRead = []; 
           
           const formattedMsgs = msgs.map(msg => {
             const isMe = msg.senderId === myId;
-            const readBy = msg.readBy || [];
+            const readBy = msg.readBy || []; 
 
-            // 如果这消息不是我发的，且我还没读，加入待标记列表
             if (!isMe && !readBy.includes(myId)) {
-               unreadIds.push(msg._id);
+               idsToMarkRead.push(msg._id);
             }
 
-            // 2. 处理显示逻辑 (头像、已读文案)
+            let readStatusText = '';
+            if (isMe) {
+               const readerIds = readBy.filter(uid => uid !== myId);
+               if (readerIds.length > 0) {
+                   const names = readerIds.map(uid => that.data.memberMap[uid]?.nickName).filter(n => n);
+                   if (names.length > 0) {
+                       readStatusText = names.length > 2 ? `${names.slice(0, 2).join(',')}等${names.length}人 已读` : `${names.join(',')} 已读`;
+                   } else {
+                       readStatusText = `${readerIds.length}人 已读`;
+                   }
+               } else {
+                   readStatusText = '未读';
+               }
+            }
+
             let avatar = msg.avatar;
             if (that.data.memberMap[msg.senderId]) {
                avatar = that.data.memberMap[msg.senderId].avatarUrl;
-            }
-
-            // 生成已读文案
-            let statusText = '';
-            if (isMe) {
-               // 排除自己后的已读列表
-               const otherReaders = readBy.filter(uid => uid !== myId);
-               
-               if (otherReaders.length === 0) {
-                   statusText = '未读';
-               } else {
-                   // 尝试转昵称
-                   const names = otherReaders.map(uid => that.data.memberMap[uid]?.nickName).filter(n => n);
-                   if (names.length > 0) {
-                       // 如果人多，只显示前2个名字 + 人数
-                       if (names.length > 2) {
-                           statusText = `${names.slice(0, 2).join(',')}等${names.length}人已读`;
-                       } else {
-                           statusText = `${names.join(', ')} 已读`;
-                       }
-                   } else {
-                       // 兜底显示人数
-                       statusText = `${otherReaders.length}人已读`;
-                   }
-               }
             }
 
             return {
               ...msg,
               isMe,
               avatar: avatar || '/images/default-room.png',
-              readStatusText: statusText
+              readStatusText: readStatusText
             };
           });
 
           that.setData({ 
             messages: formattedMsgs,
-            scrollId: 'bottom-pad' // 自动滚动到底部
+            scrollId: 'bottom-pad' 
           });
 
-          // 3. 执行已读标记 (只要我在这个页面，来了新消息就立刻标记)
-          if (unreadIds.length > 0) {
-             that.markMessagesRead(unreadIds);
+          if (idsToMarkRead.length > 0) {
+             that.markMessagesRead(idsToMarkRead);
           }
         },
-        onError: function(err) { console.error(err); }
+        onError: function(err) {}
       });
   },
 
-  // 批量标记已读
   markMessagesRead(ids) {
-    // 遍历更新 (小程序端限制，只能循环)
     ids.forEach(id => {
        db.collection('messages').doc(id).update({
-          data: {
-             readBy: _.addToSet(this.userInfo._id) // 原子操作：加入我的ID
-          }
-       });
+          data: { readBy: _.addToSet(this.userInfo._id) }
+       }).catch(console.error);
     });
   },
 
   onInput(e) { this.setData({ inputVal: e.detail.value }) },
 
+  // --- 发送时加入详细日志 ---
   send() {
     const content = this.data.inputVal;
     if (!content) return;
     
-    // 计算给谁发红点 (群里除了我以外的人)
     let unreadTargets = [];
+    const myId = this.userInfo._id;
+
     if (this.data.chatInfo && this.data.chatInfo.members) {
-       unreadTargets = this.data.chatInfo.members.filter(id => id !== this.userInfo._id);
+       // 原始成员列表
+       const allMembers = this.data.chatInfo.members;
+       console.log('[调试-发送] 原始成员列表:', allMembers);
+       console.log('[调试-发送] 我的ID:', myId);
+
+       // 过滤
+       unreadTargets = allMembers.filter(id => id !== myId);
+       
+       console.log('[调试-发送] 过滤后的未读目标(unreadTargets):', unreadTargets);
+       
+       // 双重检查：如果过滤后还包含我自己，打印警告
+       if (unreadTargets.includes(myId)) {
+           console.error('!!! [严重错误] 未读列表里依然包含我自己，请检查ID类型是否一致 !!!');
+       }
+    } else {
+        console.error('[调试-发送] chatInfo 为空，无法计算未读人员');
     }
 
     const msg = {
@@ -161,22 +153,27 @@ Page({
       senderId: this.userInfo._id, 
       avatar: this.userInfo.avatarUrl,
       createTime: db.serverDate(),
-      readBy: [] // 初始 readBy 为空
+      readBy: [] 
     };
 
-    // 1. 发送消息
+    const tempMsg = { ...msg, isMe: true, readStatusText: '...', _id: 'temp_'+Date.now() };
+    this.setData({ messages: [...this.data.messages, tempMsg], inputVal: '', scrollId: 'bottom-pad' });
+
     db.collection('messages').add({ data: { ...msg, createTime: db.serverDate() } });
 
-    // 2. 更新会话 (红点和最新消息)
+    // 更新会话
+    console.log('[调试-发送] 正在更新 chats 集合, 写入 unreadMembers:', unreadTargets);
     db.collection('chats').doc(this.data.chatId).update({
       data: {
         lastMessage: content,
         updateTime: db.serverDate(),
         unreadMembers: unreadTargets 
       }
+    }).then(() => {
+        console.log('[调试-发送] chats 更新成功');
+    }).catch(err => {
+        console.error('[调试-发送] chats 更新失败', err);
     });
-
-    this.setData({ inputVal: '' });
   },
 
   goBack() { wx.navigateBack(); },
