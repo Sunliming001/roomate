@@ -1,13 +1,49 @@
 page { background: #fff; }
-.header { background: #EDEDED; padding: 20rpx 30rpx; font-weight: bold; border-bottom: 1rpx solid #dcdcdc; position: fixed; width: 100%; z-index: 99; top:0; left:0; height: 44px; display: flex; align-items: center;}
-.chat-list { margin-top: 20rpx; }
-.chat-item { display: flex; padding: 24rpx 30rpx; align-items: center; active: #f0f0f0; }
-.chat-item:active { background: #f5f5f5; }
-.avatar { width: 96rpx; height: 96rpx; border-radius: 10rpx; background: #ddd; margin-right: 24rpx; }
+.tabs { display: flex; padding: 0 30rpx; border-bottom: 1rpx solid #eee; margin-bottom: 10rpx; }
+.tab { font-size: 32rpx; color: #999; margin-right: 40rpx; padding: 20rpx 0; position: relative; }
+.tab.active { color: #333; font-weight: bold; font-size: 36rpx; }
+
+/* 总红点 */
+.dot { width: 16rpx; height: 16rpx; background: #FF2442; border-radius: 50%; position: absolute; top: 16rpx; right: -12rpx; }
+
+/* 列表 */
+.list-box { padding-bottom: 100rpx; }
+.chat-item { display: flex; padding: 24rpx 30rpx; align-items: center; }
+.chat-item:active { background: #f9f9f9; }
+
+.avatar-box { position: relative; margin-right: 24rpx; }
+.avatar { width: 96rpx; height: 96rpx; border-radius: 10rpx; background: #ddd; }
+/* 聊天单行红点 */
+.red-badge { width: 20rpx; height: 20rpx; background: #FF2442; border-radius: 50%; position: absolute; top: -6rpx; right: -6rpx; border: 2rpx solid #fff; }
+
 .content { flex: 1; border-bottom: 1rpx solid #f0f0f0; padding-bottom: 24rpx; }
 .top { display: flex; justify-content: space-between; margin-bottom: 8rpx; }
 .name { font-size: 32rpx; font-weight: 500; color: #000; }
 .time { font-size: 24rpx; color: #ccc; }
 .btm { display: flex; }
-.last-msg { font-size: 26rpx; color: #999; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 500rpx; }
-.empty { text-align: center; color: #999; margin-top: 100rpx; }
+.last-msg { font-size: 26rpx; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500rpx; }
+
+/* 通知样式 */
+.notif-card { margin: 20rpx 30rpx; padding: 30rpx; background: #fff; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05); border-radius: 16rpx; border: 1rpx solid #f0f0f0; position: relative; }
+.n-icon { font-size: 40rpx; margin-right: 24rpx; width: 60rpx; text-align: center; position: relative; }
+/* 小红点 */
+.mini-dot { width: 12rpx; height: 12rpx; background: #FF2442; border-radius: 50%; position: absolute; top: 0; right: 0; }
+
+.notif-card.simple { display: flex; align-items: flex-start;}
+.n-info { flex: 1; }
+.n-title { font-weight: bold; font-size: 30rpx; margin-bottom: 8rpx; }
+.n-desc { font-size: 28rpx; color: #666; margin-bottom: 8rpx; }
+.n-time { font-size: 22rpx; color: #ccc; }
+
+.req-head { display: flex; justify-content: space-between; font-size: 24rpx; color: #999; margin-bottom: 20rpx; border-bottom: 1rpx solid #f5f5f5; padding-bottom: 10rpx; }
+.req-user { display: flex; align-items: center; margin-bottom: 20rpx; }
+.u-avt { width: 80rpx; height: 80rpx; border-radius: 50%; background: #eee; margin-right: 20rpx; }
+.u-n { font-weight: bold; font-size: 30rpx; }
+.u-d { font-size: 24rpx; color: #666; }
+.view-dtl { font-size: 24rpx; color: #576b95; margin-left: auto; }
+.req-actions { display: flex; gap: 20rpx; justify-content: flex-end; }
+.btn { margin: 0; font-size: 24rpx; }
+.agree { background: #333; color: #fff; }
+.reject { background: #f5f5f5; color: #666; }
+.req-res { text-align: right; font-size: 26rpx; color: #999; font-weight: bold; }
+.empty { text-align: center; margin-top: 100rpx; color: #ccc; }

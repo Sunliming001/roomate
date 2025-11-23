@@ -22,8 +22,8 @@ page { background: #F6F6F6; }
 .tit { font-weight:bold; font-size:28rpx; margin-bottom:10rpx; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .dots { display:flex; align-items:center; gap:8rpx; margin-bottom:12rpx; flex-wrap:wrap; }
 .dot { width:16rpx; height:16rpx; border-radius:50%; border:2rpx solid #ccc; box-sizing: border-box; }
-.dot.male { background:#4CAF50; border:none; }
-.dot.female { background:#F48FB1; border:none; }
+.dot.male { background:#4CAF50; border:none; } 
+.dot.female { background:#F48FB1; border:none; } 
 .dist { font-size:20rpx; color:#999; margin-left:auto; }
 .btm { display:flex; justify-content:space-between; align-items:center; font-size:22rpx; color:#666; }
 .pub { display:flex; align-items:center; overflow: hidden; flex: 1; }

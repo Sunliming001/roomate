@@ -1,11 +1,9 @@
 <view class="container">
-  <!-- 导航返回 -->
   <view class="back-btn" style="top:{{statusBarHeight+8}}px" bindtap="goBack">←</view>
 
-  <!-- 顶部相册 -->
   <swiper class="swiper" indicator-dots circular>
     <block wx:for="{{gallery}}" wx:key="index">
-      <swiper-item>
+      <swiper-item bindtap="previewImg" data-url="{{item.url}}">
         <image src="{{item.url}}" mode="aspectFill" class="slide-img"></image>
         <view class="slide-label">{{item.name}}</view>
       </swiper-item>
@@ -30,7 +28,6 @@
                 </view>
              </view>
              <view class="rr-r">
-                <!-- 已入住 -->
                 <block wx:if="{{item.status==1}}">
                    <view class="occ-badge">已入住</view>
                    <view class="occ-info">
@@ -39,7 +36,6 @@
                       <text>·{{item.occupantDisplay.job}}</text>
                    </view>
                 </block>
-                <!-- 招募中 -->
                 <block wx:else>
                    <view class="vac-price">¥{{item.price}}</view>
                    <view class="exp-txt">期望: {{['不限','男','女'][item.expectGender]}}</view>
@@ -50,11 +46,44 @@
     </view>
 
     <view class="card pub-card">
-      <image class="p-avt" src="{{info.publisher.avatarUrl || '/images/default.png'}}"></image>
+       <image class="p-avt" src="{{info.publisher.avatarUrl}}"></image>
        <view class="p-txt">
           <view class="pn">{{info.publisher.nickName}}</view>
           <view class="pt">房主</view>
        </view>
+    </view>
+  </view>
+
+  <view style="height: 180rpx;"></view>
+
+  <view class="footer-bar safe-bottom">
+    <view class="icon-btn" bindtap="handleFav">
+      <!-- 实心星代表已收藏 -->
+      <text class="icon" style="color: {{isFav ? '#FFD700' : '#666'}}">{{isFav ? '★' : '☆'}}</text>
+      <text class="txt">{{isFav ? '已收藏' : '收藏'}}</text>
+    </view>
+    
+    <view class="chat-btn" bindtap="handleChat">
+      <text>💬 聊一聊</text>
+    </view>
+
+    <button class="join-btn" bindtap="openJoinModal" disabled="{{info.status==='completed'}}">
+      {{info.status==='completed' ? '已满员' : '我想加入'}}
+    </button>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showJoinModal}}" bindtap="closeJoinModal">
+    <view class="modal-content" catchtap="true">
+      <view class="m-title">选择要加入的房间</view>
+      <view class="m-list">
+        <block wx:for="{{info.rooms}}" wx:key="index">
+          <view wx:if="{{item.status==0}}" class="m-item" bindtap="confirmJoin" data-idx="{{index}}" data-name="{{item.name}}">
+            <view class="m-name">{{item.name}}</view>
+            <view class="m-price">¥{{item.price}}</view>
+            <view class="m-btn">申请加入</view>
+          </view>
+        </block>
+      </view>
     </view>
   </view>
 </view>

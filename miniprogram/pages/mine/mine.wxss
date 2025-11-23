@@ -6,25 +6,22 @@ page { background: #F6F6F6; }
 .avatar { width: 120rpx; height: 120rpx; border-radius: 50%; margin-right: 24rpx; background: #eee; }
 .name { font-size: 36rpx; font-weight: 900; margin-bottom: 10rpx; }
 .tags text { font-size: 22rpx; background: #F5F5F7; color: #666; padding: 4rpx 10rpx; border-radius: 8rpx; margin-right: 10rpx; }
+.edit-btn { font-size: 24rpx; color: #999; margin-left: auto; }
 
-/* 统计模块 */
 .stats-grid { display: flex; justify-content: space-between; margin-bottom: 40rpx; }
 .stat-box { 
   width: 30%; background: #fff; padding: 20rpx 0; border-radius: 16rpx; 
-  text-align: center; transition: all 0.2s; 
-  border: 2rpx solid transparent;
+  text-align: center; transition: all 0.2s; border: 2rpx solid transparent;
 }
 .stat-box.active { border-color: #FF2442; background: #FFF0F5; }
 .num { font-size: 36rpx; font-weight: 900; color: #333; }
 .lbl { font-size: 24rpx; color: #999; margin-top: 6rpx; }
 
-/* 列表区 */
 .list-title { font-size: 30rpx; font-weight: bold; margin-bottom: 20rpx; color: #333; }
-.item-card { background: #fff; border-radius: 16rpx; padding: 20rpx; display: flex; margin-bottom: 20rpx; }
-.i-img { width: 180rpx; height: 140rpx; border-radius: 12rpx; background: #eee; margin-right: 20rpx; }
+.item-card { background: #fff; border-radius: 16rpx; padding: 20rpx; display: flex; margin-bottom: 20rpx; box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.02); }
+.i-img { width: 200rpx; height: 150rpx; border-radius: 12rpx; background: #eee; margin-right: 20rpx; }
 .i-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-.i-title { font-size: 30rpx; font-weight: bold; }
-.i-desc { font-size: 24rpx; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400rpx;}
+.i-title { font-size: 30rpx; font-weight: bold; display: -webkit-box; -webkit-line-clamp: 1; overflow: hidden; text-overflow: ellipsis; -webkit-box-orient: vertical; }
 .i-status { display: flex; justify-content: space-between; align-items: center; }
 .st-tag { font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 6rpx; }
 .st-tag.red { background: #FFF0F5; color: #FF2442; }

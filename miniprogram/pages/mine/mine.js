@@ -1,42 +1,111 @@
 const app = getApp();
-const mock = require('../../utils/mock.js');
+const db = wx.cloud.database();
+const _ = db.command;
 
 Page({
   data: {
     paddingTop: app.globalData.statusBarHeight + 10,
     user: {},
-    stats: {},
-    // 当前选中的模块
-    activeTab: 'pub', // 默认显示发布
+    stats: { pub: 0, fav: 0, join: 0 },
+    activeTab: 'pub', 
     listData: []
   },
 
   onShow() {
-    // 每次进入重新拉取最新用户信息
     const user = wx.getStorageSync('my_user_info');
+    if(!user) return wx.navigateTo({ url: '/pages/login/login' });
     this.setData({ user });
-    // ... 拉取统计数据 ...
-  },
-  goEdit() {
-    wx.navigateTo({ url: '/pages/profile-edit/profile-edit' });
+    this.loadAllData();
   },
 
-  // 点击切换模块
+  onPullDownRefresh() {
+    this.loadAllData(() => wx.stopPullDownRefresh());
+  },
+
+  goEdit() { wx.navigateTo({ url: '/pages/profile-edit/profile-edit' }); },
+
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab;
+    this.setData({ activeTab: tab });
     this.loadList(tab);
   },
 
-  loadList(tab) {
-    let data = [];
-    if (tab === 'pub') data = mock.getMyPublish();
-    if (tab === 'fav') data = mock.getMyFavs();
-    if (tab === 'contract') data = mock.getMyContracts();
-    
-    this.setData({ 
-      activeTab: tab,
-      listData: data 
+  loadAllData(cb) {
+    const user = this.data.user;
+    const p1 = db.collection('rooms').where({ 'publisher._id': user._id }).count();
+    const p2 = db.collection('favorites').where({ userId: user._id }).count();
+    const p3 = db.collection('rooms').where({ memberIds: user._id }).count();
+
+    Promise.all([p1, p2, p3]).then(res => {
+      this.setData({
+        stats: {
+          pub: res[0].total,
+          fav: res[1].total,
+          join: res[2].total
+        }
+      });
+      this.loadList(this.data.activeTab);
+      if(cb) cb();
     });
+  },
+
+  loadList(tab) {
+    const user = this.data.user;
+    wx.showLoading({ title: '加载中' });
+
+    if (tab === 'pub') {
+      db.collection('rooms').where({
+        'publisher._id': user._id 
+      }).orderBy('createTime', 'desc').get().then(res => {
+        this.processList(res.data);
+        wx.hideLoading();
+      });
+    } 
+    else if (tab === 'join') {
+      db.collection('rooms').where({
+        memberIds: user._id 
+      }).orderBy('createTime', 'desc').get().then(res => {
+        let list = res.data;
+        // 排除自己发布的
+        list = list.filter(item => item.publisher._id !== user._id);
+        this.processList(list);
+        wx.hideLoading();
+      });
+    } 
+    else if (tab === 'fav') {
+      db.collection('favorites').where({ userId: user._id }).get().then(res => {
+        const roomIds = res.data.map(i => i.roomId);
+        if (roomIds.length === 0) {
+          this.processList([]); 
+          wx.hideLoading();
+          return;
+        }
+        db.collection('rooms').where({
+          _id: _.in(roomIds)
+        }).get().then(roomsRes => {
+          this.processList(roomsRes.data);
+          wx.hideLoading();
+        });
+      });
+    }
+  },
+
+  processList(list) {
+    list.forEach(item => {
+        let cover = '';
+        const vacantRoom = item.rooms.find(r => r.status == 0 && r.photos && r.photos.length > 0);
+        if (vacantRoom) {
+           cover = vacantRoom.photos[0];
+        } else {
+           const anyRoom = item.rooms.find(r => r.photos && r.photos.length > 0);
+           cover = anyRoom ? anyRoom.photos[0] : '/images/default-room.png';
+        }
+        item.cover = cover;
+
+        const prices = item.rooms.filter(r => r.status == 0).map(r => parseFloat(r.price)||0);
+        item.minPrice = prices.length ? Math.min(...prices) : '暂无';
+    });
+    this.setData({ listData: list });
   },
 
   goDetail(e) {

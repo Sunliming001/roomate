@@ -1,10 +1,26 @@
 <view class="container" style="padding-top: {{paddingTop}}px">
-  <view class="header">微信(仿)</view>
-  
-  <view class="chat-list">
-    <block wx:for="{{list}}" wx:key="_id">
+  <view class="tabs">
+    <view class="tab {{curTab==0?'active':''}}" bindtap="switchTab" data-idx="0">
+      聊天
+      <!-- 聊天总红点 -->
+      <view class="dot" wx:if="{{hasUnreadChat}}"></view>
+    </view>
+    <view class="tab {{curTab==1?'active':''}}" bindtap="switchTab" data-idx="1">
+      通知 
+      <!-- 通知总红点 -->
+      <view class="dot" wx:if="{{hasUnreadNotif}}"></view>
+    </view>
+  </view>
+
+  <!-- 聊天列表 -->
+  <view wx:if="{{curTab==0}}" class="list-box">
+    <block wx:for="{{chatList}}" wx:key="_id">
       <view class="chat-item" bindtap="goChat" data-id="{{item._id}}" data-name="{{item.roomName}}">
-        <image class="avatar" src="{{item.targetAvatar || '/images/default.png'}}"></image>
+        <view class="avatar-box">
+           <image class="avatar" src="{{item.targetAvatar}}"></image>
+           <!-- 单个聊天红点 -->
+           <view class="red-badge" wx:if="{{item.hasUnread}}"></view>
+        </view>
         <view class="content">
           <view class="top">
             <text class="name">{{item.roomName}}</text>
@@ -16,6 +32,49 @@
         </view>
       </view>
     </block>
-    <view wx:if="{{list.length==0}}" class="empty">暂无消息</view>
+    <view wx:if="{{chatList.length==0}}" class="empty">暂无聊天</view>
+  </view>
+
+  <!-- 通知列表 -->
+  <view wx:if="{{curTab==1}}" class="list-box">
+    <block wx:for="{{notifList}}" wx:key="_id">
+      <!-- 普通通知 (点击消除红点) -->
+      <view class="notif-card simple" wx:if="{{item.type !== 'join_req'}}" bindtap="readNotification" data-id="{{item._id}}" data-read="{{item.isRead}}">
+        <view class="n-icon">
+           {{item.icon}}
+           <view class="mini-dot" wx:if="{{!item.isRead}}"></view>
+        </view>
+        <view class="n-info">
+           <view class="n-title">{{item.title}}</view>
+           <view class="n-desc">{{item.content}}</view>
+           <view class="n-time">{{item.timeStr}}</view>
+        </view>
+      </view>
+
+      <!-- 申请通知 (点击展开或操作时消除红点) -->
+      <view class="notif-card req" wx:if="{{item.type === 'join_req'}}">
+        <view class="req-head">
+           <text class="rh-t">申请加入 <text class="mini-dot" wx:if="{{!item.isRead}}"></text></text>
+           <text class="rh-time">{{item.timeStr}}</text>
+        </view>
+        <view class="req-user" bindtap="viewApplicant" data-user="{{item.sender}}">
+           <image class="u-avt" src="{{item.sender.avatarUrl}}"></image>
+           <view class="u-info">
+              <view class="u-n">{{item.sender.nickName}}</view>
+              <view class="u-d">{{['男','女'][item.sender.gender-1]}} · {{item.sender.job}}</view>
+           </view>
+           <text class="view-dtl">查看详情 ></text>
+        </view>
+        <view class="req-actions" wx:if="{{item.status=='pending'}}">
+           <!-- 操作按钮点击同时触发“已读”逻辑 -->
+           <button class="btn reject" size="mini" bindtap="handleReq" data-id="{{item._id}}" data-act="reject" data-idx="{{index}}">拒绝</button>
+           <button class="btn agree" size="mini" bindtap="handleReq" data-id="{{item._id}}" data-act="agree" data-idx="{{index}}">同意</button>
+        </view>
+        <view class="req-res" wx:else>
+           {{item.status=='accepted' ? '已同意' : '已拒绝'}}
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{notifList.length==0}}" class="empty">暂无通知</view>
   </view>
 </view>

@@ -1,35 +1,52 @@
 <view class="container" style="padding-top: {{paddingTop}}px">
-  <view class="page-title">编辑个人资料</view>
+  <view class="page-title">编辑资料</view>
 
-  <view class="form-card">
-    <button class="avatar-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-      <text class="label">头像</text>
-      <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
-      <text class="arrow">></text>
+  <!-- 信息卡片 -->
+  <view class="group-card">
+    <!-- 头像行 -->
+    <button class="cell-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <text class="cell-lbl">头像</text>
+      <view class="cell-val">
+        <image class="avatar" src="{{userInfo.avatarUrl || '/images/default.png'}}"></image>
+        <text class="arrow">></text>
+      </view>
     </button>
     
-    <view class="input-row">
-      <text class="label">昵称</text>
-      <input class="val-input" type="nickname" value="{{userInfo.nickName}}" bindchange="onNickNameChange"/>
+    <!-- 昵称行 -->
+    <view class="cell-row">
+      <text class="cell-lbl">昵称</text>
+      <input class="cell-inp" type="nickname" value="{{userInfo.nickName}}" bindchange="onNickNameChange" placeholder="请输入"/>
     </view>
 
-    <view class="input-row">
-      <text class="label">职业</text>
-      <input class="val-input" value="{{userInfo.job}}" bindinput="bindInput" data-key="job" placeholder="请填写职业"/>
-    </view>
+    <!-- 性别行 -->
+    <picker range="{{['未知','男','女']}}" value="{{userInfo.gender}}" bindchange="onGenderChange">
+      <view class="cell-row">
+        <text class="cell-lbl">性别</text>
+        <view class="cell-val">
+          <text>{{['未知','男','女'][userInfo.gender]}}</text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+    </picker>
 
-    <view class="input-row">
-      <text class="label">性别</text>
-      <picker range="{{['未知','男','女']}}" value="{{userInfo.gender}}" bindchange="onGenderChange">
-        <view class="picker-val">{{['未知','男','女'][userInfo.gender]}} ></view>
-      </picker>
+    <!-- 职业行 -->
+    <view class="cell-row last">
+      <text class="cell-lbl">职业</text>
+      <input class="cell-inp" value="{{userInfo.job}}" bindinput="bindInput" data-key="job" placeholder="请填写职业"/>
     </view>
   </view>
 
-  <view class="section-title">个人标签</view>
-  <view class="tags-area">
+  <!-- 标签区域 -->
+  <view class="section-header">
+    <text>个人标签</text>
+    <text class="sub">选择适合你的标签</text>
+  </view>
+  
+  <view class="tags-wrap">
     <block wx:for="{{tagOptions}}" wx:key="*this">
-      <view class="tag {{tags[item]?'active':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
+      <view class="tag-pill {{tags[item] ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">
+        {{item}}
+      </view>
     </block>
   </view>
 

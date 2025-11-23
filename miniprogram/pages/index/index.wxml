@@ -2,7 +2,7 @@
   <!-- 顶部导航 -->
   <view class="header" style="padding-top:{{statusBarHeight}}px">
     <view class="row">
-       <!-- 修复：点击跳转城市选择页 -->
+       <!-- 城市选择 -->
        <view class="city-picker" bindtap="toCityPage">
          <text>{{currentCity}}</text>
          <text class="arrow">▾</text>
@@ -21,23 +21,28 @@
     </view>
   </view>
 
-  <!-- 下方筛选和列表保持不变，请保留原代码 ... -->
+  <!-- 筛选栏 -->
   <view class="filters" style="top:{{statusBarHeight+44}}px">
-    <picker range="{{['全部','招男','招女','不限']}}" bindchange="onFilterGender">
-       <view class="tag {{filter.gender>0?'act':''}}">
-         {{['期望性别','招男','招女','不限'][filter.gender] || '期望性别'}} ▾
+    <!-- 核心修改：添加'全部'，对应索引 0,1,2,3 -->
+    <picker range="{{['全部','招男生','招女生','不限']}}" bindchange="onFilterGender">
+       <!-- 如果索引是0(全部)，显示“期望性别”，否则显示选中的具体项 -->
+       <view class="tag {{filter.gender > 0 ? 'act' : ''}}">
+         {{ filter.gender > 0 ? ['全部','招男生','招女生','不限'][filter.gender] : '期望性别' }} ▾
        </view>
     </picker>
+    
     <picker range="{{['租金','2k以下','2k-3k','3k以上']}}" bindchange="onFilterPrice">
        <view class="tag {{filter.priceIdx>0?'act':''}}">
          {{['租金','2k以下','2k-3k','3k以上'][filter.priceIdx]}} ▾
        </view>
     </picker>
+    
     <view class="tag {{filter.ensuite?'act':''}}" bindtap="toggleEnsuite">独卫</view>
   </view>
 
   <view style="height:{{statusBarHeight+44+40}}px"></view>
 
+  <!-- 瀑布流 -->
   <view class="waterfall">
     <view class="col">
       <block wx:for="{{leftList}}" wx:key="_id"><template is="card" data="{{item}}"/></block>
@@ -50,7 +55,7 @@
   <view wx:if="{{leftList.length==0 && rightList.length==0}}" class="empty-tip">当前城市暂无符合条件的房源</view>
 </view>
 
-<!-- 卡片模板保持不变 -->
+<!-- 卡片模板 -->
 <template name="card">
   <view class="card" bindtap="goDetail" data-id="{{item._id}}">
     <image src="{{item.cover}}" mode="aspectFill" class="cover"></image>

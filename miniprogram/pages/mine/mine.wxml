@@ -2,20 +2,18 @@
   <!-- 个人卡片 -->
   <view class="profile-card">
     <view class="p-top">
-      <!-- 显示当前头像，如果没有则显示默认 -->
       <image class="avatar" src="{{user.avatarUrl || '/images/default.png'}}"></image>
       <view class="p-info">
-        <view class="name">{{user.nickName || '未登录'}}</view>
+        <view class="name">{{user.nickName || '请先登录'}}</view>
         <view class="tags">
            <text wx:for="{{user.tagList}}" wx:key="*this">{{item}}</text>
         </view>
       </view>
-      <!-- 修改资料入口 -->
       <view class="edit-btn" bindtap="goEdit">修改资料 ></view>
     </view>
   </view>
 
-  <!-- 三大模块入口 (点击可切换下方列表) -->
+  <!-- 统计模块 -->
   <view class="stats-grid">
     <view class="stat-box {{activeTab=='pub'?'active':''}}" bindtap="switchTab" data-tab="pub">
       <view class="num">{{stats.pub}}</view>
@@ -25,29 +23,32 @@
       <view class="num">{{stats.fav}}</view>
       <view class="lbl">我的收藏</view>
     </view>
-    <view class="stat-box {{activeTab=='contract'?'active':''}}" bindtap="switchTab" data-tab="contract">
-      <view class="num">{{stats.contract}}</view>
-      <view class="lbl">我的签约</view>
+    <view class="stat-box {{activeTab=='join'?'active':''}}" bindtap="switchTab" data-tab="join">
+      <!-- 这里数字可能会包含自己发布的(因为数据库count没法做复杂排除)，但列表点击进去是准确过滤的 -->
+      <view class="num">{{stats.join}}</view>
+      <view class="lbl">我的加入</view>
     </view>
   </view>
 
-  <!-- 详情列表展示区 -->
+  <!-- 列表展示区 -->
   <view class="list-container">
     <view class="list-title">
-      {{activeTab=='pub'?'发布的房源':(activeTab=='fav'?'收藏的房源':'签约合同')}}
+      {{activeTab=='pub'?'我发布的房源':(activeTab=='fav'?'我收藏的房源':'我加入的房源')}}
     </view>
     
     <block wx:for="{{listData}}" wx:key="id">
-      <view class="item-card" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="item-card" bindtap="goDetail" data-id="{{item._id}}">
         <image class="i-img" src="{{item.cover}}" mode="aspectFill"></image>
         <view class="i-info">
           <view class="i-title">{{item.community}} {{item.layout.room}}室</view>
-          <view class="i-desc">{{item.desc}}</view>
+          
           <view class="i-status">
-            <text class="st-tag {{item.status=='signed'?'gray':'red'}}">
-              {{item.status=='signed'?'已签约':'招募中'}}
-            </text>
-            <text class="price">¥{{item.totalPrice}}</text>
+             <!-- 状态标签 -->
+             <text class="st-tag {{item.status=='completed'?'gray':'red'}}">
+               {{item.status=='completed'?'已完成':'招募中'}}
+             </text>
+             <!-- 如果不是已完成，显示价格 -->
+             <text class="price" wx:if="{{item.status!='completed'}}">¥{{item.minPrice}}起</text>
           </view>
         </view>
       </view>

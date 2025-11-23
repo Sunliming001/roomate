@@ -1,6 +1,4 @@
 {
-  "navigationBarTitleText": "",
-  "usingComponents": {
-    "cloud-tip-modal": "/components/cloudTipModal/index"
-  }
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true
 }

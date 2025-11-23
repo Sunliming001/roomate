@@ -1,6 +1,19 @@
 <view class="container">
-  <!-- 消息列表 (使用 scroll-view 实现滚动) -->
-  <scroll-view scroll-y class="chat-scroll" scroll-into-view="{{scrollId}}">
+  <!-- 1. 自定义顶部导航栏 (注明交流群) -->
+  <view class="custom-header" style="padding-top:{{statusBarHeight}}px; height:44px;">
+    <view class="header-row">
+      <view class="back-btn" bindtap="goBack">←</view>
+      <view class="header-title">{{title}}</view>
+    </view>
+  </view>
+
+  <!-- 2. 消息列表 (计算高度，避开顶部和底部) -->
+  <scroll-view 
+    scroll-y 
+    class="chat-scroll" 
+    scroll-into-view="{{scrollId}}"
+    style="padding-top: {{statusBarHeight + 44}}px; padding-bottom: calc(120rpx + env(safe-area-inset-bottom));"
+  >
     <block wx:for="{{messages}}" wx:key="_id">
       <view class="msg-row {{item.isMe ? 'my-msg' : 'other-msg'}}" id="msg-{{index}}">
         <image class="avatar" src="{{item.avatar}}"></image>
@@ -9,11 +22,11 @@
         </view>
       </view>
     </block>
-    <!-- 底部占位，防止被输入框遮挡 -->
-    <view id="bottom-pad" style="height: 120rpx;"></view>
+    <!-- 底部垫片，用于自动滚动定位 -->
+    <view id="bottom-pad" style="height: 20rpx;"></view>
   </scroll-view>
 
-  <!-- 底部输入框 -->
+  <!-- 3. 底部输入框 (安全边界控制) -->
   <view class="input-area">
     <input class="msg-input" value="{{inputVal}}" bindinput="onInput" placeholder="发送消息..." confirm-type="send" bindconfirm="send"/>
     <button class="send-btn" bindtap="send">发送</button>

@@ -29,7 +29,6 @@ Page({
     const u = this.data.userInfo;
     u.tagList = Object.keys(this.data.tags);
     
-    // 更新云端
     db.collection('users').doc(u._id).update({
       data: {
         avatarUrl: u.avatarUrl,

@@ -4,6 +4,7 @@ const db = wx.cloud.database();
 Page({
   data: {
     paddingTop: (app.globalData?.statusBarHeight || 20) + 20,
+    // 定义清晰的初始状态
     initialData: {
       community: '', location: null, city: '',
       layout: { room: '', hall: 1, toilet: 1 },
@@ -17,25 +18,29 @@ Page({
   },
 
   onLoad() {
-    this.setData({ formData: JSON.parse(JSON.stringify(this.data.initialData)) });
+    this.resetForm();
   },
 
-  // 选位置 (同时解析城市)
+  resetForm() {
+    this.setData({ 
+      formData: JSON.parse(JSON.stringify(this.data.initialData)) 
+    });
+  },
+
   chooseLocation() {
     const that = this;
     wx.chooseLocation({
       success(res) {
-        // 尝试从地址字符串中提取城市名
-        let city = '南京市'; // 默认兜底
+        let city = '南京市'; 
         const cityMatch = res.address.match(/([^省]+市)/);
         if (cityMatch && cityMatch[1]) {
             city = cityMatch[1];
             if (city.length > 10) city = city.substring(city.length - 3); 
+            if (city.indexOf('省') > -1) city = city.split('省')[1];
         } else {
             const directCity = res.address.match(/^(.+?市)/);
             if(directCity) city = directCity[1];
         }
-
         that.setData({ 
           'formData.community': res.name,
           'formData.address': res.address,
@@ -98,7 +103,6 @@ Page({
     this.setData({ [`formData.rooms[${idx}].expectGender`]: e.detail.value });
   },
 
-  // --- 核心修复：图片上传到云存储 ---
   uploadRoomPhoto(e) {
     const idx = e.currentTarget.dataset.idx;
     const that = this;
@@ -107,24 +111,15 @@ Page({
       success(res) {
         const tempPath = res.tempFiles[0].tempFilePath;
         wx.showLoading({ title: '上传中...' });
-        
-        // 生成随机文件名
         const cloudPath = 'room-photos/' + Date.now() + '-' + Math.floor(Math.random() * 1000) + '.png';
-        
         wx.cloud.uploadFile({
-          cloudPath: cloudPath,
-          filePath: tempPath,
+          cloudPath: cloudPath, filePath: tempPath,
           success: uploadRes => {
-            // 获取 fileID (cloud://...) 这是一个永久地址
             const fileID = uploadRes.fileID;
             that.setData({ [`formData.rooms[${idx}].photos`]: [fileID] });
             wx.hideLoading();
           },
-          fail: err => {
-            console.error(err);
-            wx.hideLoading();
-            wx.showToast({ title: '上传失败', icon: 'none' });
-          }
+          fail: err => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); }
         })
       }
     });
@@ -135,8 +130,6 @@ Page({
     if(!d.community || !d.location) return wx.showToast({title:'请选择位置', icon:'none'});
     
     const user = wx.getStorageSync('my_user_info');
-    
-    // 自动填入本人性别
     d.rooms.forEach(r => {
       if (r.status == 1 && r.isMeIndex == 0) {
         r.occupant.genderIndex = user.gender == 2 ? 1 : 0; 
@@ -146,15 +139,28 @@ Page({
     wx.showLoading({ title: '发布中' });
     db.collection('rooms').add({
       data: {
-        ...d,
-        publisher: user,
-        createTime: db.serverDate(),
+        ...d, publisher: user, createTime: db.serverDate(), status: 'active',
         minPrice: Math.min(...d.rooms.filter(r=>r.status==0).map(r=>parseFloat(r.price)||999999))
       },
       success: res => {
         wx.hideLoading();
-        wx.showToast({title:'发布成功'});
-        setTimeout(() => wx.switchTab({ url: '/pages/index/index' }), 1000);
+        wx.showToast({title:'发布成功', icon: 'success'});
+        
+        // --- 核心修复：重置表单并跳转 ---
+        this.resetForm();
+        
+        // 延迟跳转，让用户看到成功提示
+        setTimeout(() => {
+          wx.switchTab({ 
+            url: '/pages/index/index',
+            success: function (e) {
+              // 触发首页刷新
+              var page = getCurrentPages().pop();
+              if (page == undefined || page == null) return;
+              page.onLoad(); 
+            }
+          });
+        }, 1000);
       }
     });
   }
