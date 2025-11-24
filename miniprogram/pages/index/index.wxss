@@ -31,3 +31,37 @@ page { background: #F6F6F6; }
 .nm { max-width:160rpx; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .fav { color:#999; margin-left: 10rpx;}
 .empty-tip { text-align:center; margin-top:200rpx; color:#999; font-size:28rpx; }
+
+/* 租金滑块弹窗 */
+.slider-box {
+  position: fixed; top: 130rpx; left: 0; width: 100%; background: #fff;
+  padding: 30rpx; z-index: 100; box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.05);
+  box-sizing: border-box;
+}
+.slider-title { font-size: 24rpx; color: #999; margin-bottom: 40rpx; }
+.slider-container {
+  width: 100%; height: 40rpx; position: relative; margin-bottom: 30rpx;
+}
+.slider-track {
+  width: 100%; height: 8rpx; background: #f0f0f0; border-radius: 4rpx;
+  position: absolute; top: 16rpx;
+}
+.slider-highlight {
+  height: 8rpx; background: #F4D03F; /* 淡黄色高亮 */
+  position: absolute; top: 16rpx; border-radius: 4rpx;
+}
+.slider-handle {
+  width: 40rpx; height: 40rpx; background: #fff; border-radius: 50%;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.2); position: absolute; top: 0;
+  margin-left: -20rpx; /* 居中 */
+}
+.slider-handle .tip {
+  position: absolute; top: -40rpx; left: 50%; transform: translateX(-50%);
+  font-size: 20rpx; color: #333; background: #fff; padding: 2rpx 8rpx;
+  border-radius: 4rpx; border: 1rpx solid #eee; white-space: nowrap;
+}
+.confirm-btn { background: #333; color: #fff; float: right; }
+.mask {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.3); z-index: 97;
+}

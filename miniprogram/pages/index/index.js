@@ -10,7 +10,15 @@ Page({
     currentCity: '南京市', 
     userLoc: null,
     searchKeyword: '',
-    filter: { gender: 0, priceIdx: 0, ensuite: false }
+    filter: { gender: 0, ensuite: false },
+    // 租金滑块相关
+    showPriceSlider: false,
+    priceMin: 0,
+    priceMax: 10000,
+    leftPercent: 0,
+    rightPercent: 100,
+    widthPercent: 100,
+    sliderWidth: 0 // 轨道像素宽度
   },
 
   onShow() {
@@ -44,7 +52,87 @@ Page({
       this.loadData();
     }
   },
+  onReady() {
+    // 获取滑块轨道宽度
+    this.getSliderWidth();
+  },
+  getSliderWidth() {
+    const query = wx.createSelectorQuery();
+    query.select('#slider-track').boundingClientRect(rect => {
+        if(rect) this.setData({ sliderWidth: rect.width });
+    }).exec();
+  },
+  // --- 租金滑块逻辑 ---
+  togglePriceSlider() { 
+    this.setData({ showPriceSlider: !this.data.showPriceSlider }, () => {
+        if(this.data.showPriceSlider) this.getSliderWidth(); 
+    });
+},
+   // 移动左滑块 (Min)
+   onMoveMin(e) {
+    const pageX = e.touches[0].pageX;
+    const trackLeft = 30 * (wx.getSystemInfoSync().windowWidth / 750); // 估算padding left
+    
+    // 计算在轨道上的位置 [0, sliderWidth]
+    let x = pageX - trackLeft;
+    if (x < 0) x = 0;
+    if (x > this.data.sliderWidth) x = this.data.sliderWidth;
+    
+    // 转为数值 (0 - 10000)
+    let rawVal = (x / this.data.sliderWidth) * 10000;
+    
+    // 吸附到 500
+    let snappedVal = Math.round(rawVal / 500) * 500;
+    
+    // 边界限制：不能超过 (右滑块 - 500)
+    if (snappedVal >= this.data.priceMax) snappedVal = this.data.priceMax - 500;
+    if (snappedVal < 0) snappedVal = 0;
 
+    // 转回百分比用于 UI
+    const percent = (snappedVal / 10000) * 100;
+
+    this.setData({
+        priceMin: snappedVal,
+        leftPercent: percent,
+        widthPercent: this.data.rightPercent - percent
+    });
+},
+
+ // 移动右滑块 (Max)
+ onMoveMax(e) {
+  const pageX = e.touches[0].pageX;
+  const trackLeft = 30 * (wx.getSystemInfoSync().windowWidth / 750); 
+  
+  let x = pageX - trackLeft;
+  if (x < 0) x = 0;
+  if (x > this.data.sliderWidth) x = this.data.sliderWidth;
+  
+  let rawVal = (x / this.data.sliderWidth) * 10000;
+  let snappedVal = Math.round(rawVal / 500) * 500;
+  
+  // 边界限制：不能小于 (左滑块 + 500)
+  if (snappedVal <= this.data.priceMin) snappedVal = this.data.priceMin + 500;
+  if (snappedVal > 10000) snappedVal = 10000;
+
+  const percent = (snappedVal / 10000) * 100;
+
+  this.setData({
+      priceMax: snappedVal,
+      rightPercent: percent,
+      widthPercent: percent - this.data.leftPercent
+  });
+},
+resetPrice() {
+  this.setData({
+      priceMin: 0, priceMax: 10000,
+      leftPercent: 0, rightPercent: 100, widthPercent: 100
+  });
+},
+
+confirmPrice() {
+  this.togglePriceSlider();
+  this.loadData();
+},
   onPullDownRefresh() {
     this.loadData(() => wx.stopPullDownRefresh());
     app.checkTabBarBadge(); // 刷新时也检查
@@ -112,38 +200,38 @@ Page({
       this.loadData();
   },
 
+ // --- 加载数据 ---
+  // --- 加载数据 ---
   loadData(cb) {
     wx.showLoading({ title: '加载中' });
-
     const whereCondition = { city: this.data.currentCity };
-    if (this.data.searchKeyword) {
-      whereCondition.community = db.RegExp({
-        regexp: this.data.searchKeyword,
-        options: 'i',
-      });
-    }
+    if (this.data.searchKeyword) whereCondition.community = db.RegExp({ regexp: this.data.searchKeyword, options: 'i' });
 
     db.collection('rooms').where(whereCondition).get({
       success: res => {
         let list = res.data;
         const f = this.data.filter;
+        const pMin = this.data.priceMin;
+        const pMax = this.data.priceMax;
 
-        // 1. 过滤已完成
+        // 过滤已完成
         list = list.filter(item => item.status === 'active');
 
-        // 2. 筛选
+        // 联合筛选
         list = list.filter(house => {
-          if (!house.rooms || house.rooms.length === 0) return false;
-          const hasMatchingRoom = house.rooms.some(room => {
+          if (!house.rooms) return false;
+          return house.rooms.some(room => {
+            // 必须是招募中
             if (parseInt(room.status) !== 0) return false; 
+            // 独卫
             if (f.ensuite && !room.hasEnsuite) return false; 
-            const price = parseFloat(room.price) || 0;
-            if (f.priceIdx === 1 && price >= 2000) return false;
-            if (f.priceIdx === 2 && (price < 2000 || price > 3000)) return false;
-            if (f.priceIdx === 3 && price <= 3000) return false;
 
+            // 租金范围筛选 (pMin ~ pMax)
+            const price = parseFloat(room.price) || 0;
+            if (price < pMin || price > pMax) return false;
+
+            // 性别
             const dbExpect = parseInt(room.expectGender); 
-            // 0全部, 1招男, 2招女, 3不限
             if (f.gender === 1) { // 招男
                if (dbExpect !== 1 && dbExpect !== 0) return false;
             }
@@ -155,21 +243,17 @@ Page({
             }
             return true; 
           });
-          return hasMatchingRoom; 
         });
 
-        // 3. 排序
+        // 距离排序
         if(this.data.userLoc) {
           list.forEach(item => {
-             if(item.location) {
-                item._dist = this.calcDist(this.data.userLoc, item.location);
-                item.distStr = item._dist < 1000 ? item._dist.toFixed(0)+'m' : (item._dist/1000).toFixed(1)+'km';
-             }
+             if(item.location) item._dist = this.calcDist(this.data.userLoc, item.location);
+             list.sort((a, b) => (a._dist||99999) - (b._dist||99999));
           });
-          list.sort((a, b) => (a._dist||99999) - (b._dist||99999));
         }
 
-        // 4. UI处理
+        // UI处理
         list.forEach(item => {
            let cover = '';
            const vacantRoom = item.rooms.find(r => r.status == 0 && r.photos && r.photos.length > 0);

@@ -2,20 +2,13 @@
   <!-- 顶部导航 -->
   <view class="header" style="padding-top:{{statusBarHeight}}px">
     <view class="row">
-       <!-- 城市选择 -->
        <view class="city-picker" bindtap="toCityPage">
          <text>{{currentCity}}</text>
          <text class="arrow">▾</text>
        </view>
-
-       <!-- 搜索框 -->
        <view class="search-box" bindtap="onSearchTap">
          <icon type="search" size="14"></icon>
-         <input class="search-input" 
-                placeholder="点击搜索小区位置" 
-                value="{{searchKeyword}}" 
-                disabled="true" 
-         />
+         <input class="search-input" placeholder="点击搜索小区位置" value="{{searchKeyword}}" disabled="true" />
          <view wx:if="{{searchKeyword}}" catchtap="clearSearch" class="clear-icon">×</view>
        </view>
     </view>
@@ -23,22 +16,52 @@
 
   <!-- 筛选栏 -->
   <view class="filters" style="top:{{statusBarHeight+44}}px">
-    <!-- 核心修改：添加'全部'，对应索引 0,1,2,3 -->
     <picker range="{{['全部','招男生','招女生','不限']}}" bindchange="onFilterGender">
-       <!-- 如果索引是0(全部)，显示“期望性别”，否则显示选中的具体项 -->
        <view class="tag {{filter.gender > 0 ? 'act' : ''}}">
          {{ filter.gender > 0 ? ['全部','招男生','招女生','不限'][filter.gender] : '期望性别' }} ▾
        </view>
     </picker>
     
-    <picker range="{{['租金','2k以下','2k-3k','3k以上']}}" bindchange="onFilterPrice">
-       <view class="tag {{filter.priceIdx>0?'act':''}}">
-         {{['租金','2k以下','2k-3k','3k以上'][filter.priceIdx]}} ▾
-       </view>
-    </picker>
+    <!-- 点击触发滑块弹窗 -->
+    <view class="tag {{showPriceSlider?'act':''}}" bindtap="togglePriceSlider">
+        {{ (priceMin > 0 || priceMax < 10000) ? (priceMin + '-' + priceMax) : '租金范围' }} ▾
+    </view>
     
     <view class="tag {{filter.ensuite?'act':''}}" bindtap="toggleEnsuite">独卫</view>
   </view>
+
+  <!-- 租金滑块弹层 -->
+  <view class="slider-box" wx:if="{{showPriceSlider}}">
+     <view class="slider-title">
+        租金范围 (¥{{priceMin}} - ¥{{priceMax}})
+        <text style="font-size:20rpx; margin-left:10rpx; color:#ccc;"></text>
+     </view>
+     
+     <view class="slider-container" id="slider-track">
+        <!-- 灰色轨道 -->
+        <view class="slider-track"></view>
+        <!-- 高亮条 (淡黄色) -->
+        <view class="slider-highlight" style="left:{{leftPercent}}%; width:{{widthPercent}}%"></view>
+        
+        <!-- 左滑块 -->
+        <view class="slider-handle" style="left:{{leftPercent}}%" catchtouchmove="onMoveMin">
+           <view class="tip">¥{{priceMin}}</view>
+        </view>
+        
+        <!-- 右滑块 -->
+        <view class="slider-handle" style="left:{{rightPercent}}%" catchtouchmove="onMoveMax">
+           <view class="tip">¥{{priceMax}}</view>
+        </view>
+     </view>
+     
+     <view class="slider-btns">
+        <button class="reset-btn" size="mini" bindtap="resetPrice">重置</button>
+        <button class="confirm-btn" size="mini" bindtap="confirmPrice">确定</button>
+     </view>
+  </view>
+  
+  <!-- 遮罩 -->
+  <view class="mask" wx:if="{{showPriceSlider}}" bindtap="togglePriceSlider"></view>
 
   <view style="height:{{statusBarHeight+44+40}}px"></view>
 
