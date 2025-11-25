@@ -38,8 +38,8 @@ Page({
       app.checkTabBarBadge();
       return;
     }
-    // --- 核心：每次显示首页都检查底部红点 ---
-    app.checkTabBarBadge();
+     // --- 修复：主动检查红点 ---
+     app.pollBadgeStatus();
     // 正常逻辑
     if (app.globalData.selectedCity) {
       this.setData({ currentCity: app.globalData.selectedCity });
@@ -135,7 +135,7 @@ confirmPrice() {
 },
   onPullDownRefresh() {
     this.loadData(() => wx.stopPullDownRefresh());
-    app.checkTabBarBadge(); // 刷新时也检查
+    app.pollBadgeStatus();
   },
 
   getUserLocation() {

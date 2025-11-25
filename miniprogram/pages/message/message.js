@@ -17,7 +17,19 @@ Page({
 
   onShow() {
     console.log('[调试-消息页] onShow 触发');
+    // 1. 立即加载一次
     this.loadData();
+    
+    // 2. 注册全局回调：当 app.js 监听到新消息时，自动触发这里的 loadData
+    app.globalData.messagePageCallback = () => {
+        console.log('[消息页] 收到全局更新通知，自动刷新列表...');
+        this.loadData();
+    };
+  },
+
+  onHide() {
+    // 离开页面时，取消回调，避免后台刷新浪费资源
+    app.globalData.messagePageCallback = null;
   },
 
   onPullDownRefresh() {

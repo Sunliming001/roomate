@@ -17,12 +17,13 @@ Page({
     if(!user) return wx.navigateTo({ url: '/pages/login/login' });
     this.setData({ user });
     this.loadAllData();
-    app.checkTabBarBadge(); // 检查红点
+    app.pollBadgeStatus();
   },
 // ...
 
   onPullDownRefresh() {
     this.loadAllData(() => wx.stopPullDownRefresh());
+    app.pollBadgeStatus();
   },
 
   goEdit() { wx.navigateTo({ url: '/pages/profile-edit/profile-edit' }); },
