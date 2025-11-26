@@ -12,31 +12,41 @@
     </button>
 
     <view class="form-box">
-      <!-- 昵称 -->
+      <!-- 基础信息 -->
       <view class="input-group">
         <view class="label">昵称</view>
         <input type="nickname" class="input" placeholder="请输入昵称" bindchange="onNickNameChange"/>
       </view>
 
-      <!-- 职业 -->
       <view class="input-group">
         <view class="label">职业</view>
         <input class="input" placeholder="例如：产品经理" bindinput="bindInput" data-key="job"/>
       </view>
 
-      <!-- 性别 -->
       <view class="gender-row">
         <view class="g-btn {{userInfo.gender==1?'active-m':''}}" bindtap="setGender" data-v="1">♂ 男生</view>
         <view class="g-btn {{userInfo.gender==2?'active-f':''}}" bindtap="setGender" data-v="2">♀ 女生</view>
       </view>
 
-      <!-- 标签 -->
+      <!-- 标签选择区域 -->
       <view class="tags-section">
-        <view class="label">个人标签</view>
+        <view class="label">个人标签 <text style="font-size:22rpx;color:#999;font-weight:normal">(点击选择或自定义)</text></view>
+        
+        <!-- 1. 预设标签 -->
         <view class="tags-list">
           <block wx:for="{{tagOptions}}" wx:key="*this">
             <view class="tag {{tags[item]?'selected':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
           </block>
+          <!-- 2. 自定义添加的标签 -->
+          <block wx:for="{{extraTags}}" wx:key="*this">
+            <view class="tag {{tags[item]?'selected':''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
+          </block>
+        </view>
+
+        <!-- 3. 自定义输入框 -->
+        <view class="custom-tag-row">
+           <input class="c-input" placeholder="输入自定义标签 (限6字)" value="{{inputTagVal}}" bindinput="onTagInput" maxlength="6"/>
+           <view class="add-btn" bindtap="addCustomTag">添加</view>
         </view>
       </view>
     </view>

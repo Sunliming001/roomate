@@ -24,7 +24,6 @@
       <view class="lbl">我的收藏</view>
     </view>
     <view class="stat-box {{activeTab=='join'?'active':''}}" bindtap="switchTab" data-tab="join">
-      <!-- 这里数字可能会包含自己发布的(因为数据库count没法做复杂排除)，但列表点击进去是准确过滤的 -->
       <view class="num">{{stats.join}}</view>
       <view class="lbl">我的加入</view>
     </view>
@@ -37,18 +36,22 @@
     </view>
     
     <block wx:for="{{listData}}" wx:key="id">
+      <!-- 点击卡片看详情 -->
       <view class="item-card" bindtap="goDetail" data-id="{{item._id}}">
         <image class="i-img" src="{{item.cover}}" mode="aspectFill"></image>
         <view class="i-info">
           <view class="i-title">{{item.community}} {{item.layout.room}}室</view>
           
           <view class="i-status">
-             <!-- 状态标签 -->
              <text class="st-tag {{item.status=='completed'?'gray':'red'}}">
                {{item.status=='completed'?'已完成':'招募中'}}
              </text>
-             <!-- 如果不是已完成，显示价格 -->
              <text class="price" wx:if="{{item.status!='completed'}}">¥{{item.minPrice}}起</text>
+          </view>
+
+          <!-- 修改按钮：仅在“我的发布”且状态未完成时显示 (或已完成也可修改) -->
+          <view class="edit-action" wx:if="{{activeTab=='pub'}}" catchtap="goEditRoom" data-id="{{item._id}}">
+             📝 修改
           </view>
         </view>
       </view>

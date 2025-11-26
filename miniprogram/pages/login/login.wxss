@@ -21,8 +21,13 @@ page { background: #F0F2F5; }
 .g-btn.active-f { background: #FFF5F7; color: #D53F8C; border-color: #D53F8C; }
 
 .tags-section { margin-bottom: 50rpx; }
-.tags-list { display: flex; flex-wrap: wrap; gap: 16rpx; }
-.tag { padding: 12rpx 24rpx; background: #F5F7FA; color: #666; border-radius: 30rpx; font-size: 26rpx; border: 1px solid transparent; }
-.tag.selected { background: #333; color: #fff; transform: scale(1.05); font-weight: bold; }
+.tags-list { display: flex; flex-wrap: wrap; gap: 16rpx; margin-bottom: 20rpx; }
+.tag { padding: 10rpx 24rpx; background: #F5F7FA; color: #666; border-radius: 30rpx; font-size: 24rpx; border: 1px solid transparent; transition: all 0.2s; }
+.tag.selected { background: #333; color: #fff; transform: scale(1.05); font-weight: bold; box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.1); }
+
+.custom-tag-row { display: flex; gap: 20rpx; }
+.c-input { flex: 1; background: #F7FAFC; height: 72rpx; padding: 0 24rpx; border-radius: 12rpx; font-size: 26rpx; border: 1rpx solid #eee; }
+.add-btn { width: 120rpx; height: 72rpx; background: #333; color: #fff; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; font-size: 26rpx; font-weight: bold; }
+.add-btn:active { opacity: 0.8; }
 
 .submit-btn { background: #FF2442; color: #fff; border-radius: 48rpx; font-weight: bold; height: 96rpx; line-height: 96rpx; width: 100% !important; font-size: 34rpx; box-shadow: 0 10rpx 20rpx rgba(255, 36, 66, 0.2); }

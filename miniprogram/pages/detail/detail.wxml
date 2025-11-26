@@ -1,6 +1,8 @@
 <view class="container">
+  <!-- 导航返回 -->
   <view class="back-btn" style="top:{{statusBarHeight+8}}px" bindtap="goBack">←</view>
 
+  <!-- 顶部相册 -->
   <swiper class="swiper" indicator-dots circular>
     <block wx:for="{{gallery}}" wx:key="index">
       <swiper-item bindtap="previewImg" data-url="{{item.url}}">
@@ -11,11 +13,13 @@
   </swiper>
 
   <view class="content">
+    <!-- 标题卡片 -->
     <view class="card title-card">
       <view class="h1">{{info.community}} {{info.layout.room}}室</view>
       <view class="price">¥{{info.minPrice}}<text class="sub">起/月</text></view>
     </view>
 
+    <!-- 房间分配情况 -->
     <view class="card">
        <view class="st">房间分配情况</view>
        <block wx:for="{{info.rooms}}" wx:key="index">
@@ -45,6 +49,7 @@
        </block>
     </view>
 
+    <!-- 房主信息 -->
     <view class="card pub-card">
        <image class="p-avt" src="{{info.publisher.avatarUrl}}"></image>
        <view class="p-txt">
@@ -56,11 +61,18 @@
 
   <view style="height: 180rpx;"></view>
 
+  <!-- 底部操作栏 -->
   <view class="footer-bar safe-bottom">
+    <!-- 收藏按钮 -->
     <view class="icon-btn" bindtap="handleFav">
-      <!-- 实心星代表已收藏 -->
       <text class="icon" style="color: {{isFav ? '#FFD700' : '#666'}}">{{isFav ? '★' : '☆'}}</text>
       <text class="txt">{{isFav ? '已收藏' : '收藏'}}</text>
+    </view>
+    
+    <!-- 新增：分享按钮 -->
+    <view class="icon-btn" bindtap="openShareModal">
+      <text class="icon">↗</text>
+      <text class="txt">分享</text>
     </view>
     
     <view class="chat-btn" bindtap="handleChat">
@@ -72,6 +84,7 @@
     </button>
   </view>
 
+  <!-- 加入选择弹窗 -->
   <view class="modal-mask" wx:if="{{showJoinModal}}" bindtap="closeJoinModal">
     <view class="modal-content" catchtap="true">
       <view class="m-title">选择要加入的房间</view>
@@ -86,4 +99,41 @@
       </view>
     </view>
   </view>
+
+  <!-- 新增：分享选择弹窗 -->
+  <view class="share-mask" wx:if="{{showShareModal}}" bindtap="closeShareModal">
+    <view class="share-panel" catchtap="true">
+      <view class="share-title">分享到</view>
+      <view class="share-grid">
+        <!-- 微信好友 (原生能力) -->
+        <button class="share-item" open-type="share">
+          <view class="s-icon wx">💬</view>
+          <text>微信好友</text>
+        </button>
+        <!-- 其他平台 (复制链接) -->
+        <view class="share-item" bindtap="handleShareTo" data-app="朋友圈">
+          <view class="s-icon pyq">◎</view>
+          <text>朋友圈</text>
+        </view>
+        <view class="share-item" bindtap="handleShareTo" data-app="QQ">
+          <view class="s-icon qq">🐧</view>
+          <text>QQ</text>
+        </view>
+        <view class="share-item" bindtap="handleShareTo" data-app="小红书">
+          <view class="s-icon xhs">📕</view>
+          <text>小红书</text>
+        </view>
+        <view class="share-item" bindtap="handleShareTo" data-app="微博">
+          <view class="s-icon wb">🔴</view>
+          <text>微博</text>
+        </view>
+        <view class="share-item" bindtap="handleCopyLink">
+          <view class="s-icon link">🔗</view>
+          <text>复制链接</text>
+        </view>
+      </view>
+      <view class="share-cancel" bindtap="closeShareModal">取消</view>
+    </view>
+  </view>
+
 </view>

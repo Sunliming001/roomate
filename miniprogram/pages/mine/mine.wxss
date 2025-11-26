@@ -29,3 +29,16 @@ page { background: #F6F6F6; }
 .price { font-weight: bold; color: #FF2442; font-size: 30rpx; }
 
 .empty-tip { text-align: center; color: #ccc; padding: 60rpx 0; font-size: 28rpx; }
+/* ... 原有 CSS ... */
+
+/* 在 .i-info 内部 */
+.edit-action {
+  margin-top: 10rpx;
+  align-self: flex-start;
+  font-size: 24rpx;
+  color: #333;
+  background: #f0f0f0;
+  padding: 4rpx 16rpx;
+  border-radius: 30rpx;
+  border: 1rpx solid #ddd;
+}

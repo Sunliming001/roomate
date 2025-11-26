@@ -9,12 +9,12 @@ Page({
     gallery: [],
     isFav: false,
     showJoinModal: false,
+    showShareModal: false, // 控制分享弹窗
     userInfo: null
   },
 
   onShow() {
     this.setData({ userInfo: wx.getStorageSync('my_user_info') });
-    // 每次显示都检查收藏状态
     if(this.roomId) this.checkFavStatus();
   },
 
@@ -23,7 +23,52 @@ Page({
     this.loadRoomDetail();
   },
 
-  // 下拉刷新
+  // --- 核心：原生微信分享设置 ---
+  onShareAppMessage() {
+    const title = `【友邻找室友】${this.data.info.community} 招室友啦！`;
+    const imageUrl = this.data.info.cover; // 使用房源封面
+    return {
+      title: title,
+      path: `/pages/detail/detail?id=${this.roomId}`, // 别人点开后跳回这里
+      imageUrl: imageUrl
+    }
+  },
+
+  // --- 分享交互逻辑 ---
+  openShareModal() { this.setData({ showShareModal: true }); },
+  closeShareModal() { this.setData({ showShareModal: false }); },
+
+  // 复制链接/口令
+  handleShareTo(e) {
+    const appName = e.currentTarget.dataset.app;
+    const content = `【友邻·找室友】我在${this.data.info.community}发现了一个很棒的房子！快来看看：pages/detail/detail?id=${this.roomId} (请复制到微信打开)`;
+    
+    wx.setClipboardData({
+      data: content,
+      success: () => {
+        this.closeShareModal();
+        wx.showModal({
+          title: '口令已复制',
+          content: `请打开 ${appName} 粘贴分享。由于平台限制，无法直接跳转。`,
+          showCancel: false,
+          confirmText: '知道了'
+        });
+      }
+    });
+  },
+
+  handleCopyLink() {
+    const link = `pages/detail/detail?id=${this.roomId}`;
+    wx.setClipboardData({
+      data: link,
+      success: () => {
+        this.closeShareModal();
+        wx.showToast({ title: '链接已复制', icon: 'success' });
+      }
+    });
+  },
+
+  // --- 原有逻辑保持不变 ---
   onPullDownRefresh() {
     this.loadRoomDetail(() => {
       this.checkFavStatus();
@@ -37,7 +82,8 @@ Page({
         const d = res.data;
         this.processData(d);
         if(cb) cb();
-      }
+      },
+      fail: () => { if(cb) cb(); }
     });
   },
 
@@ -77,10 +123,8 @@ Page({
       wx.previewImage({ current: e.currentTarget.dataset.url, urls });
   },
 
-  // --- 收藏功能 (云端版) ---
   checkFavStatus() {
     if (!this.data.userInfo) return;
-    // 查询 favorites 集合
     db.collection('favorites').where({
       roomId: this.roomId,
       userId: this.data.userInfo._id
@@ -92,54 +136,32 @@ Page({
   handleFav() {
     if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
     const me = this.data.userInfo;
-    
-    if (this.data.isFav) {
-      // 取消收藏
-      db.collection('favorites').where({
-        roomId: this.roomId,
-        userId: me._id
-      }).remove().then(() => {
-        this.setData({ isFav: false });
-        // 更新房间计数
-        db.collection('rooms').doc(this.roomId).update({ data: { favCount: _.inc(-1) } });
-        wx.showToast({ title: '已取消', icon: 'none' });
-      });
+    const newFavStatus = !this.data.isFav;
+    this.setData({ isFav: newFavStatus });
+
+    if (!newFavStatus) {
+      db.collection('favorites').where({ roomId: this.roomId, userId: me._id }).remove()
+        .then(() => db.collection('rooms').doc(this.roomId).update({ data: { favCount: _.inc(-1) } }))
+        .catch(() => this.setData({ isFav: true }));
     } else {
-      // 添加收藏
       db.collection('favorites').add({
-        data: {
-          userId: me._id,
-          roomId: this.roomId,
-          createTime: db.serverDate()
-        }
+        data: { userId: me._id, roomId: this.roomId, createTime: db.serverDate() }
       }).then(() => {
-        this.setData({ isFav: true });
-        // 更新房间计数
         db.collection('rooms').doc(this.roomId).update({ data: { favCount: _.inc(1) } });
-        
-        // 发送通知
         if (me._id !== this.data.info.publisher._id) {
           db.collection('notifications').add({
-            data: {
-              type: 'fav',
-              targetUserId: this.data.info.publisher._id,
-              sender: me,
-              content: '收藏了你的房源',
-              community: this.data.info.community,
-              roomId: this.roomId,
-              createTime: db.serverDate(),
-              isRead: false
-            }
+            data: { type: 'fav', targetUserId: this.data.info.publisher._id, sender: me, content: '收藏了你的房源', community: this.data.info.community, roomId: this.roomId, createTime: db.serverDate(), isRead: false }
           });
         }
         wx.showToast({ title: '已收藏', icon: 'none' });
+      }).catch(() => {
+        this.setData({ isFav: false });
+        wx.showToast({ title: '操作失败', icon: 'none' });
       });
     }
   },
 
-  // ... handleChat, openJoinModal, confirmJoin 等保持不变 ...
-  // 请直接复用上次的聊天和加入逻辑代码，此处为了篇幅省略重复部分，重点是上面的收藏逻辑更新
-  handleChat() { /* 复用上次代码 */
+  handleChat() {
     if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
     const me = this.data.userInfo;
     const owner = this.data.info.publisher;

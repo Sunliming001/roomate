@@ -1,9 +1,7 @@
 <view class="container" style="padding-top: {{paddingTop}}px">
   <view class="page-title">编辑资料</view>
 
-  <!-- 信息卡片 -->
   <view class="group-card">
-    <!-- 头像行 -->
     <button class="cell-row" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
       <text class="cell-lbl">头像</text>
       <view class="cell-val">
@@ -12,13 +10,11 @@
       </view>
     </button>
     
-    <!-- 昵称行 -->
     <view class="cell-row">
       <text class="cell-lbl">昵称</text>
       <input class="cell-inp" type="nickname" value="{{userInfo.nickName}}" bindchange="onNickNameChange" placeholder="请输入"/>
     </view>
 
-    <!-- 性别行 -->
     <picker range="{{['未知','男','女']}}" value="{{userInfo.gender}}" bindchange="onGenderChange">
       <view class="cell-row">
         <text class="cell-lbl">性别</text>
@@ -29,25 +25,31 @@
       </view>
     </picker>
 
-    <!-- 职业行 -->
     <view class="cell-row last">
       <text class="cell-lbl">职业</text>
       <input class="cell-inp" value="{{userInfo.job}}" bindinput="bindInput" data-key="job" placeholder="请填写职业"/>
     </view>
   </view>
 
-  <!-- 标签区域 -->
   <view class="section-header">
     <text>个人标签</text>
-    <text class="sub">选择适合你的标签</text>
+    <text class="sub">点击选择或添加自定义</text>
   </view>
   
   <view class="tags-wrap">
+    <!-- 预设 -->
     <block wx:for="{{tagOptions}}" wx:key="*this">
-      <view class="tag-pill {{tags[item] ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">
-        {{item}}
-      </view>
+      <view class="tag-pill {{tags[item] ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
     </block>
+    <!-- 自定义 -->
+    <block wx:for="{{extraTags}}" wx:key="*this">
+      <view class="tag-pill {{tags[item] ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
+    </block>
+  </view>
+
+  <view class="custom-input-box">
+     <input class="c-in" placeholder="添加自定义标签" value="{{inputTagVal}}" bindinput="onTagInput" maxlength="6"/>
+     <view class="c-btn" bindtap="addCustomTag">+</view>
   </view>
 
   <button class="save-btn" bindtap="save">保存修改</button>
