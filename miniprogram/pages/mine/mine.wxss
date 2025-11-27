@@ -1,44 +1,181 @@
-page { background: #F6F6F6; }
-.container { padding: 0 30rpx; }
+page { background: #F2F2F7; }
+.container { padding: 30rpx 32rpx; }
 
-.profile-card { background: #fff; border-radius: 24rpx; padding: 30rpx; margin-bottom: 30rpx; }
-.p-top { display: flex; align-items: center; }
-.avatar { width: 120rpx; height: 120rpx; border-radius: 50%; margin-right: 24rpx; background: #eee; }
-.name { font-size: 36rpx; font-weight: 900; margin-bottom: 10rpx; }
-.tags text { font-size: 22rpx; background: #F5F5F7; color: #666; padding: 4rpx 10rpx; border-radius: 8rpx; margin-right: 10rpx; }
-.edit-btn { font-size: 24rpx; color: #999; margin-left: auto; }
-
-.stats-grid { display: flex; justify-content: space-between; margin-bottom: 40rpx; }
-.stat-box { 
-  width: 30%; background: #fff; padding: 20rpx 0; border-radius: 16rpx; 
-  text-align: center; transition: all 0.2s; border: 2rpx solid transparent;
+/* 个人信息卡片 */
+.profile-card { 
+  background: #FFF; 
+  border-radius: 24rpx; 
+  padding: 40rpx 32rpx; 
+  margin-bottom: 32rpx; 
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
 }
-.stat-box.active { border-color: #FF2442; background: #FFF0F5; }
-.num { font-size: 36rpx; font-weight: 900; color: #333; }
-.lbl { font-size: 24rpx; color: #999; margin-top: 6rpx; }
 
-.list-title { font-size: 30rpx; font-weight: bold; margin-bottom: 20rpx; color: #333; }
-.item-card { background: #fff; border-radius: 16rpx; padding: 20rpx; display: flex; margin-bottom: 20rpx; box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.02); }
-.i-img { width: 200rpx; height: 150rpx; border-radius: 12rpx; background: #eee; margin-right: 20rpx; }
-.i-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-.i-title { font-size: 30rpx; font-weight: bold; display: -webkit-box; -webkit-line-clamp: 1; overflow: hidden; text-overflow: ellipsis; -webkit-box-orient: vertical; }
-.i-status { display: flex; justify-content: space-between; align-items: center; }
-.st-tag { font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 6rpx; }
+.p-top { 
+  display: flex; 
+  align-items: flex-start; /* 改为顶部对齐，方便布局 */
+}
+
+.avatar { 
+  width: 128rpx; 
+  height: 128rpx; 
+  border-radius: 50%; 
+  margin-right: 32rpx; 
+  background: #F2F2F7; 
+  border: 2rpx solid #FFF; 
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05); 
+  flex-shrink: 0;
+}
+
+.p-info { 
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 8rpx; /* 微调对齐 */
+}
+
+.name { 
+  font-size: 40rpx; 
+  font-weight: 800; 
+  color: #1C1C1E; 
+  /* 核心修改：增加下方间距 */
+  margin-bottom: 24rpx; 
+  line-height: 1.2;
+}
+
+.tags { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 12rpx; 
+}
+
+.tags text { 
+  font-size: 20rpx; 
+  background: #F5F5F7; 
+  color: #8E8E93; 
+  padding: 6rpx 16rpx; 
+  border-radius: 20rpx; 
+  line-height: 1.4;
+}
+
+/* 核心修改：修改资料按钮 - 淡黄色风格 */
+.edit-btn { 
+  font-size: 24rpx; 
+  font-weight: 600;
+  color: #B7852A; /* 深黄色字体 */
+  background: #FFFBE6; /* 淡黄色背景 */
+  padding: 12rpx 24rpx; 
+  border-radius: 30rpx; 
+  margin-left: 20rpx;
+  margin-top: 10rpx; /* 稍微下移一点 */
+  white-space: nowrap;
+  border: 1rpx solid rgba(255, 214, 102, 0.2);
+}
+.edit-btn:active {
+  background: #FFF1B8;
+}
+
+/* 统计模块 */
+.stats-grid { 
+  display: flex; 
+  justify-content: space-between; 
+  margin-bottom: 40rpx; 
+  background: #FFF; 
+  border-radius: 24rpx; 
+  padding: 30rpx 20rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
+}
+.stat-box { 
+  flex: 1; 
+  text-align: center; 
+  position: relative;
+  transition: all 0.2s;
+}
+.stat-box:active { opacity: 0.6; }
+.stat-box.active .num { color: #FF2442; }
+.stat-box.active .lbl { color: #1C1C1E; font-weight: 600; }
+
+.num { font-size: 36rpx; font-weight: 800; color: #1C1C1E; margin-bottom: 6rpx;}
+.lbl { font-size: 24rpx; color: #8E8E93; }
+
+/* 列表区域 */
+.list-title { 
+  font-size: 34rpx; 
+  font-weight: 700; 
+  margin-bottom: 24rpx; 
+  color: #1C1C1E; 
+  margin-left: 10rpx; 
+}
+
+.item-card { 
+  background: #FFF; 
+  border-radius: 20rpx; 
+  padding: 24rpx; 
+  display: flex; 
+  margin-bottom: 24rpx; 
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
+  transition: transform 0.1s;
+}
+.item-card:active { transform: scale(0.99); }
+
+.i-img { 
+  width: 220rpx; 
+  height: 160rpx; 
+  border-radius: 16rpx; 
+  background: #F2F2F7; 
+  margin-right: 24rpx; 
+  flex-shrink: 0;
+}
+
+.i-info { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between; 
+  padding: 4rpx 0; 
+}
+
+.i-title { 
+  font-size: 30rpx; 
+  font-weight: 600; 
+  color: #1C1C1E; 
+  display: -webkit-box; 
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical; 
+  overflow: hidden; 
+  line-height: 1.4;
+}
+
+.i-status { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+}
+
+.st-tag { 
+  font-size: 20rpx; 
+  padding: 6rpx 16rpx; 
+  border-radius: 8rpx; 
+  font-weight: 500;
+}
 .st-tag.red { background: #FFF0F5; color: #FF2442; }
-.st-tag.gray { background: #eee; color: #999; }
-.price { font-weight: bold; color: #FF2442; font-size: 30rpx; }
+.st-tag.gray { background: #F2F2F7; color: #8E8E93; }
+.price { font-weight: 700; color: #FF2442; font-size: 32rpx; }
 
-.empty-tip { text-align: center; color: #ccc; padding: 60rpx 0; font-size: 28rpx; }
-/* ... 原有 CSS ... */
-
-/* 在 .i-info 内部 */
-.edit-action {
+.action-row {
+  display: flex;
+  justify-content: flex-end;
   margin-top: 10rpx;
-  align-self: flex-start;
+}
+
+.edit-btn-small {
   font-size: 24rpx;
   color: #333;
   background: #f0f0f0;
-  padding: 4rpx 16rpx;
+  padding: 8rpx 24rpx;
   border-radius: 30rpx;
   border: 1rpx solid #ddd;
+  font-weight: 500;
 }
+
+.empty-tip { text-align: center; color: #C7C7CC; padding: 100rpx 0; font-size: 28rpx; }

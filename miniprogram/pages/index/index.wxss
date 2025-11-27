@@ -1,67 +1,91 @@
-page { background: #F6F6F6; }
-.header { position:fixed; top:0; left:0; width:100%; background:#fff; z-index:99; box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.02); }
-.row { height:44px; display:flex; align-items:center; padding:0 30rpx; }
+/* pages/index/index.wxss */
+page { background: #F2F2F7; }
 
-.city-picker { font-weight:bold; font-size:30rpx; margin-right:20rpx; display:flex; align-items:center; max-width: 160rpx; }
-.city-picker text { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-.arrow { font-size:24rpx; margin-left:6rpx; color:#666; }
+/* 顶部导航 - 毛玻璃效果 */
+.header { 
+  position: fixed; top: 0; left: 0; width: 100%; 
+  background: rgba(255, 255, 255, 0.85); 
+  backdrop-filter: blur(20px); /* 苹果毛玻璃 */
+  z-index: 99; 
+  border-bottom: 1rpx solid rgba(0,0,0,0.05);
+}
+.row { height: 44px; display: flex; align-items: center; padding: 0 32rpx; }
 
-.search-box { flex:1; background:#f5f5f5; height:64rpx; border-radius:32rpx; display:flex; align-items:center; padding:0 20rpx; }
-.search-input { flex:1; font-size:26rpx; margin-left:10rpx; height:100%; color: #333; }
-.clear-icon { font-size: 32rpx; color: #999; padding: 0 10rpx; font-weight: bold; }
+/* 城市选择 */
+.city-picker { 
+  font-weight: 600; font-size: 32rpx; margin-right: 24rpx; 
+  display: flex; align-items: center; max-width: 180rpx;
+}
+.arrow { font-size: 20rpx; margin-left: 8rpx; color: var(--text-main); opacity: 0.6; }
 
-.filters { position:fixed; left:0; width:100%; height:80rpx; background:#fff; display:flex; align-items:center; padding:0 30rpx; gap:20rpx; z-index:98; border-bottom:1rpx solid #eee; }
-.tag { padding:8rpx 24rpx; background:#f5f5f5; border-radius:30rpx; font-size:24rpx; color:#666; }
-.tag.act { background:#333; color:#fff; font-weight:bold; }
+/* 搜索框 - iOS 风格灰色胶囊 */
+.search-box { 
+  flex: 1; 
+  background: #E3E3E8; 
+  height: 72rpx; 
+  border-radius: 36rpx; /* 纯圆角 */
+  display: flex; align-items: center; padding: 0 24rpx; 
+  transition: all 0.2s;
+}
+.search-box:active { background: #D1D1D6; }
+.search-input { flex: 1; font-size: 28rpx; margin-left: 12rpx; height: 100%; color: #000; }
+.clear-icon { font-size: 32rpx; color: #8E8E93; padding: 10rpx; }
 
-.waterfall { display:flex; justify-content:space-between; padding:20rpx; }
-.col { width:48.5%; }
-.card { background:#fff; border-radius:16rpx; overflow:hidden; margin-bottom:20rpx; box-shadow:0 4rpx 12rpx rgba(0,0,0,0.03); }
-.cover { width:100%; height:340rpx; background:#eee; }
-.info { padding:16rpx; }
-.tit { font-weight:bold; font-size:28rpx; margin-bottom:10rpx; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.dots { display:flex; align-items:center; gap:8rpx; margin-bottom:12rpx; flex-wrap:wrap; }
-.dot { width:16rpx; height:16rpx; border-radius:50%; border:2rpx solid #ccc; box-sizing: border-box; }
-.dot.male { background:#4CAF50; border:none; } 
-.dot.female { background:#F48FB1; border:none; } 
-.dist { font-size:20rpx; color:#999; margin-left:auto; }
-.btm { display:flex; justify-content:space-between; align-items:center; font-size:22rpx; color:#666; }
-.pub { display:flex; align-items:center; overflow: hidden; flex: 1; }
-.avt { width:36rpx; height:36rpx; border-radius:50%; margin-right:10rpx; background:#eee; flex-shrink: 0;}
-.nm { max-width:160rpx; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-.fav { color:#999; margin-left: 10rpx;}
-.empty-tip { text-align:center; margin-top:200rpx; color:#999; font-size:28rpx; }
+/* 筛选栏 */
+.filters { 
+  position: fixed; left: 0; width: 100%; height: 90rpx; 
+  background: rgba(255, 255, 255, 0.95); 
+  display: flex; align-items: center; padding: 0 32rpx; gap: 20rpx; z-index: 98; 
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.02);
+}
+.tag { 
+  padding: 12rpx 28rpx; 
+  background: #F2F2F7; 
+  border-radius: 30rpx; 
+  font-size: 26rpx; 
+  color: #1C1C1E; 
+  font-weight: 500;
+  border: 1rpx solid transparent;
+  transition: all 0.2s;
+}
+.tag.act { 
+  background: #1C1C1E; /* 选中变黑，像 iOS 的 Tag */
+  color: #FFF; 
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.15);
+}
 
-/* 租金滑块弹窗 */
-.slider-box {
-  position: fixed; top: 130rpx; left: 0; width: 100%; background: #fff;
-  padding: 30rpx; z-index: 100; box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.05);
-  box-sizing: border-box;
+/* 瀑布流 */
+.waterfall { display: flex; justify-content: space-between; padding: 20rpx 24rpx; }
+.col { width: 48.5%; }
+
+/* 卡片设计 */
+.card { 
+  background: #FFF; 
+  border-radius: 20rpx; 
+  overflow: hidden; 
+  margin-bottom: 24rpx; 
+  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.03); 
+  position: relative;
 }
-.slider-title { font-size: 24rpx; color: #999; margin-bottom: 40rpx; }
-.slider-container {
-  width: 100%; height: 40rpx; position: relative; margin-bottom: 30rpx;
+.cover { width: 100%; height: 360rpx; background: #F2F2F7; display: block; }
+.info { padding: 20rpx; }
+.tit { 
+  font-weight: 600; font-size: 30rpx; margin-bottom: 12rpx; color: #000;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; 
+  line-height: 1.4;
 }
-.slider-track {
-  width: 100%; height: 8rpx; background: #f0f0f0; border-radius: 4rpx;
-  position: absolute; top: 16rpx;
-}
-.slider-highlight {
-  height: 8rpx; background: #F4D03F; /* 淡黄色高亮 */
-  position: absolute; top: 16rpx; border-radius: 4rpx;
-}
-.slider-handle {
-  width: 40rpx; height: 40rpx; background: #fff; border-radius: 50%;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.2); position: absolute; top: 0;
-  margin-left: -20rpx; /* 居中 */
-}
-.slider-handle .tip {
-  position: absolute; top: -40rpx; left: 50%; transform: translateX(-50%);
-  font-size: 20rpx; color: #333; background: #fff; padding: 2rpx 8rpx;
-  border-radius: 4rpx; border: 1rpx solid #eee; white-space: nowrap;
-}
-.confirm-btn { background: #333; color: #fff; float: right; }
-.mask {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.3); z-index: 97;
-}
+.dots { display: flex; align-items: center; gap: 8rpx; margin-bottom: 16rpx; }
+.dot { width: 14rpx; height: 14rpx; border-radius: 50%; border: 2rpx solid #C7C7CC; box-sizing: border-box; }
+.dot.male { background: #34C759; border: none; } /* iOS Green */
+.dot.female { background: #FF2442; border: none; } 
+.dist { font-size: 22rpx; color: #8E8E93; margin-left: auto; background: #F2F2F7; padding: 4rpx 10rpx; border-radius: 8rpx; }
+
+.btm { display: flex; justify-content: space-between; align-items: center; margin-top: 10rpx; }
+.pub { display: flex; align-items: center; flex: 1; overflow: hidden; }
+.avt { width: 40rpx; height: 40rpx; border-radius: 50%; margin-right: 12rpx; background: #F2F2F7; border: 1rpx solid rgba(0,0,0,0.05); }
+.nm { font-size: 22rpx; color: #8E8E93; max-width: 140rpx; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fav { font-size: 22rpx; color: #8E8E93; display: flex; align-items: center; }
+
+/* 空状态 */
+.empty-tip { text-align: center; margin-top: 200rpx; color: #AEAEB2; font-size: 28rpx; }

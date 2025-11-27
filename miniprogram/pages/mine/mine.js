@@ -16,7 +16,7 @@ Page({
     if(!user) return wx.navigateTo({ url: '/pages/login/login' });
     this.setData({ user });
     this.loadAllData();
-    app.checkTabBarBadge(); 
+    app.checkTabBarBadge();
   },
 
   onPullDownRefresh() {
@@ -25,11 +25,18 @@ Page({
 
   goEdit() { wx.navigateTo({ url: '/pages/profile-edit/profile-edit' }); },
 
-  // --- 新增：去修改帖子 ---
+  // --- 核心修复：通过全局变量传参跳转到 TabBar 页面 ---
   goEditRoom(e) {
     const id = e.currentTarget.dataset.id;
-    // 跳转到发布页，带上 ID 参数
-    wx.navigateTo({ url: `/pages/publish/publish?id=${id}` });
+    console.log('点击修改房源:', id);
+    
+    // 1. 设置全局变量
+    app.globalData.editRoomId = id;
+    
+    // 2. 切换到发布页 Tab
+    wx.switchTab({
+      url: '/pages/publish/publish'
+    });
   },
 
   switchTab(e) {

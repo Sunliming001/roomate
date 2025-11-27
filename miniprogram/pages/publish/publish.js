@@ -15,39 +15,46 @@ Page({
     ageOptions: Array.from({length: 43}, (_, i) => (i + 18) + '岁'), 
     expectGenderOptions: ['不限', '男', '女'],
     
-    // 新增：编辑模式标记
     isEditMode: false,
     editId: null
   },
 
+  // TabBar 页面初次加载只执行一次 onLoad
   onLoad(options) {
-    // 1. 检查是否是编辑模式
-    if (options.id) {
-        this.setData({ isEditMode: true, editId: options.id });
+    this.resetForm();
+  },
+
+  // --- 核心修复：每次显示时检查是否有编辑任务 ---
+  onShow() {
+    if (app.globalData.editRoomId) {
+        const id = app.globalData.editRoomId;
+        // 消费掉这个全局变量，防止下次进来重复触发
+        app.globalData.editRoomId = null;
+        
+        this.setData({ isEditMode: true, editId: id });
         wx.setNavigationBarTitle({ title: '修改房源' });
-        this.loadRoomData(options.id);
-    } else {
-        this.resetForm();
+        this.loadRoomData(id);
     }
   },
 
   resetForm() {
     this.setData({ 
-      formData: JSON.parse(JSON.stringify(this.data.initialData)) 
+      formData: JSON.parse(JSON.stringify(this.data.initialData)),
+      isEditMode: false,
+      editId: null
     });
+    wx.setNavigationBarTitle({ title: '发布找舍友' });
   },
 
-  // 2. 拉取旧数据回填
   loadRoomData(id) {
     wx.showLoading({ title: '加载数据...' });
     db.collection('rooms').doc(id).get().then(res => {
         const d = res.data;
-        // 确保 location 字段存在且格式正确
         if(!d.location) d.location = null;
-        
         this.setData({ formData: d });
         wx.hideLoading();
     }).catch(err => {
+        console.error(err);
         wx.hideLoading();
         wx.showToast({ title: '加载失败', icon: 'none' });
     });
@@ -192,28 +199,21 @@ Page({
 
     wx.showLoading({ title: this.data.isEditMode ? '更新中...' : '发布中...' });
 
-    // --- 3. 分支逻辑：新建 vs 更新 ---
     if (this.data.isEditMode) {
-        // 更新模式
-        // 移除 _id 和 _openid 字段，防止更新报错
-        delete d._id; 
+        delete d._id;
         delete d._openid;
-        
-        // 重新计算 minPrice
         d.minPrice = Math.min(...d.rooms.filter(r=>r.status==0).map(r=>parseFloat(r.price)||999999));
-        
+
         db.collection('rooms').doc(this.data.editId).update({
             data: d
         }).then(() => {
-            this.finishSubmit('更新成功');
+            this.finishSubmit('修改成功');
         }).catch(err => {
             console.error(err);
             wx.hideLoading();
-            wx.showToast({title: '更新失败', icon: 'none'});
+            wx.showToast({ title: '修改失败', icon: 'none' });
         });
-
     } else {
-        // 新建模式
         db.collection('rooms').add({
           data: {
             ...d, 
@@ -233,20 +233,17 @@ Page({
   finishSubmit(msg) {
     wx.hideLoading();
     wx.showToast({title: msg, icon: 'success'});
+    
     this.resetForm();
+    
     setTimeout(() => {
-      // 返回上一页（如果是编辑）或跳回首页（如果是发布）
-      if (this.data.isEditMode) {
-          wx.navigateBack();
-      } else {
-          wx.switchTab({ 
-            url: '/pages/index/index',
-            success: function (e) {
-              const page = getCurrentPages().pop();
-              if (page) page.onShow(); 
-            }
-          });
-      }
+      wx.switchTab({ 
+        url: '/pages/index/index',
+        success: function (e) {
+          const page = getCurrentPages().pop();
+          if (page) page.onShow(); 
+        }
+      });
     }, 1000);
   }
 })

@@ -36,7 +36,6 @@
     </view>
     
     <block wx:for="{{listData}}" wx:key="id">
-      <!-- 点击卡片看详情 -->
       <view class="item-card" bindtap="goDetail" data-id="{{item._id}}">
         <image class="i-img" src="{{item.cover}}" mode="aspectFill"></image>
         <view class="i-info">
@@ -49,10 +48,13 @@
              <text class="price" wx:if="{{item.status!='completed'}}">¥{{item.minPrice}}起</text>
           </view>
 
-          <!-- 修改按钮：仅在“我的发布”且状态未完成时显示 (或已完成也可修改) -->
-          <view class="edit-action" wx:if="{{activeTab=='pub'}}" catchtap="goEditRoom" data-id="{{item._id}}">
-             📝 修改
-          </view>
+          <!-- 新增：修改按钮 (仅在我的发布显示) -->
+          <!-- 在 item-card 内部 -->
+      <view class="action-row" wx:if="{{activeTab=='pub'}}">
+          <!-- 这里必须是 catchtap，且函数名必须是 goEditRoom -->
+          <view class="edit-btn-small" catchtap="goEditRoom" data-id="{{item._id}}">📝 修改</view>
+      </view>
+
         </view>
       </view>
     </block>

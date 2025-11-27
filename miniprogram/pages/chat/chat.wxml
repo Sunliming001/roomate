@@ -2,26 +2,53 @@
   <!-- 1. 头部 -->
   <view class="custom-header" style="padding-top:{{statusBarHeight}}px; height:44px;">
     <view class="header-row">
-      <view class="back-btn" bindtap="goBack">←</view>
+      <!-- 修改：更 Q 的返回按钮 -->
+      <view class="back-btn-q" bindtap="goBack">
+        <view class="arrow-icon"></view>
+      </view>
       <view class="header-title">{{title}}</view>
     </view>
   </view>
 
   <!-- 2. 消息列表 -->
-  <!-- 修复：padding-top 设为 状态栏+44+20(间距)，防止遮挡 -->
   <scroll-view 
     scroll-y 
     class="chat-scroll" 
     scroll-into-view="{{scrollId}}"
-    style="padding-top: {{statusBarHeight + 44 + 20}}px; padding-bottom: calc(120rpx + env(safe-area-inset-bottom));"
+    style="padding-top: {{statusBarHeight + 44 + 20}}px; padding-bottom: calc({{inputBottom}}px + {{showMore ? '300rpx' : '0rpx'}} + 120rpx + env(safe-area-inset-bottom));"
+    bindtap="closeMore"
   >
     <block wx:for="{{messages}}" wx:key="_id">
       <view class="msg-container {{item.isMe ? 'align-right' : 'align-left'}}" id="msg-{{index}}">
         
         <view class="msg-row {{item.isMe ? 'my-msg' : 'other-msg'}}">
           <image class="avatar" src="{{item.avatar}}"></image>
-          <view class="bubble">
+          
+          <!-- 文本 -->
+          <view class="bubble" wx:if="{{!item.msgType || item.msgType=='text'}}">
             <text>{{item.content}}</text>
+          </view>
+
+          <!-- 图片 -->
+          <image 
+            wx:if="{{item.msgType=='image'}}" 
+            src="{{item.content}}" 
+            mode="widthFix" 
+            class="msg-img"
+            catchtap="previewImage" 
+            data-src="{{item.content}}"
+          ></image>
+
+          <!-- 定位 -->
+          <view 
+             wx:if="{{item.msgType=='location'}}" 
+             class="msg-loc" 
+             catchtap="openLocation" 
+             data-loc="{{item.location}}"
+          >
+             <view class="loc-name">{{item.location.name}}</view>
+             <view class="loc-addr">{{item.location.address}}</view>
+             <view class="loc-map-placeholder">🗺️ 地图位置</view>
           </view>
         </view>
 
@@ -34,9 +61,33 @@
     <view id="bottom-pad" style="height: 20rpx;"></view>
   </scroll-view>
 
-  <!-- 3. 输入框 -->
-  <view class="input-area">
-    <input class="msg-input" value="{{inputVal}}" bindinput="onInput" placeholder="发送消息..." confirm-type="send" bindconfirm="send" adjust-position="{{true}}"/>
+  <!-- 3. 输入区域 -->
+  <view class="input-area" style="bottom: {{inputBottom}}px; padding-bottom: calc({{showMore ? '300rpx' : '20rpx'}} + env(safe-area-inset-bottom))">
+    <view class="more-btn" bindtap="toggleMore">+</view>
+    
+    <input 
+      class="msg-input" 
+      value="{{inputVal}}" 
+      bindinput="onInput" 
+      placeholder="发送消息..." 
+      confirm-type="send" 
+      bindconfirm="send"
+      adjust-position="{{false}}" 
+      bindfocus="onFocus"
+      bindblur="onBlur"
+    />
     <button class="send-btn" bindtap="send">发送</button>
+  </view>
+
+  <!-- 4. 更多功能面板 -->
+  <view class="more-panel" wx:if="{{showMore}}">
+     <view class="panel-item" bindtap="sendImage">
+        <view class="p-icon">🖼️</view>
+        <text>照片</text>
+     </view>
+     <view class="panel-item" bindtap="sendLocation">
+        <view class="p-icon">📍</view>
+        <text>位置</text>
+     </view>
   </view>
 </view>

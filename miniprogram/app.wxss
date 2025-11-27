@@ -1,31 +1,47 @@
-/* 全局重置与字体 - 使用微信原生字体栈 */
+/* app.wxss */
 page {
+  background-color: #F2F2F7; /* iOS 默认背景灰 */
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
-  background-color: #F6F6F6;
-  color: #333;
+  color: #1C1C1E; /* iOS 默认黑 */
+  font-size: 30rpx;
   line-height: 1.5;
-  /* 定义安全区域变量 */
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
+  
+  /* 定义全局变量 */
+  --primary-color: #FF2442; /* 你的主色调 */
+  --bg-color: #F2F2F7;
+  --card-bg: #FFFFFF;
+  --text-main: #1C1C1E;
+  --text-sub: #8E8E93;
+  --separator: #E5E5EA;
+  --radius-lg: 24rpx;
+  --radius-md: 16rpx;
+  --shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04); /* 极轻柔的阴影 */
 }
 
 .container {
   box-sizing: border-box;
 }
 
-/* 磨砂玻璃通用类 */
-.glass {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+/* 苹果风格通用卡片 */
+.ios-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: var(--shadow);
 }
 
-/* 底部按钮安全区域适配通用类 */
-.safe-bottom-fixed {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding-bottom: calc(20rpx + var(--safe-bottom)); 
-  background: #fff;
-  z-index: 99;
+/* 苹果风格列表组 (如设置页) */
+.ios-group {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 30rpx;
+}
+
+/* 点击态反馈 */
+.hover-class {
+  opacity: 0.7;
+  transform: scale(0.98);
+  transition: all 0.1s;
 }
