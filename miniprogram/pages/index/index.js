@@ -87,14 +87,34 @@ Page({
     });
   },
 
+  // 根据经纬度找最近的房源城市 (无API Key方案)
   autoUpdateCity(loc) {
-    db.collection('rooms').limit(1).get({
+    db.collection('rooms').limit(20).get({
       success: res => {
-        // 简单示例：实际应用应计算距离最近的房源城市
-        // 这里为了代码简洁，复用之前的逻辑，但注意 autoUpdateCity 此时也应调用 reload
-        this.reload();
+        let list = res.data;
+        if (list.length > 0) {
+          list.forEach(item => {
+             if(item.location) item._tempDist = this.calcDist(loc, item.location);
+             else item._tempDist = 9999999;
+          });
+          list.sort((a, b) => a._tempDist - b._tempDist);
+          const closest = list[0];
+          
+          // 50公里内算同城
+          if (closest._tempDist < 50000 && closest.city) {
+             this.setData({ currentCity: closest.city });
+          } else {
+             this.setData({ currentCity: '南京市' });
+          }
+        } else {
+          this.setData({ currentCity: '南京市' });
+        }
+        this.loadData();
       },
-      fail: () => { this.reload(); }
+      fail: () => {
+        this.setData({ currentCity: '南京市' });
+        this.loadData();
+      }
     });
   },
 
