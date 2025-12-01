@@ -9,7 +9,7 @@ Page({
     gallery: [],
     isFav: false,
     showJoinModal: false,
-    showShareModal: false, // 控制分享弹窗
+    showShareModal: false,
     userInfo: null
   },
 
@@ -23,52 +23,6 @@ Page({
     this.loadRoomDetail();
   },
 
-  // --- 核心：原生微信分享设置 ---
-  onShareAppMessage() {
-    const title = `【友邻找室友】${this.data.info.community} 招室友啦！`;
-    const imageUrl = this.data.info.cover; // 使用房源封面
-    return {
-      title: title,
-      path: `/pages/detail/detail?id=${this.roomId}`, // 别人点开后跳回这里
-      imageUrl: imageUrl
-    }
-  },
-
-  // --- 分享交互逻辑 ---
-  openShareModal() { this.setData({ showShareModal: true }); },
-  closeShareModal() { this.setData({ showShareModal: false }); },
-
-  // 复制链接/口令
-  handleShareTo(e) {
-    const appName = e.currentTarget.dataset.app;
-    const content = `【友邻·找室友】我在${this.data.info.community}发现了一个很棒的房子！快来看看：pages/detail/detail?id=${this.roomId} (请复制到微信打开)`;
-    
-    wx.setClipboardData({
-      data: content,
-      success: () => {
-        this.closeShareModal();
-        wx.showModal({
-          title: '口令已复制',
-          content: `请打开 ${appName} 粘贴分享。由于平台限制，无法直接跳转。`,
-          showCancel: false,
-          confirmText: '知道了'
-        });
-      }
-    });
-  },
-
-  handleCopyLink() {
-    const link = `pages/detail/detail?id=${this.roomId}`;
-    wx.setClipboardData({
-      data: link,
-      success: () => {
-        this.closeShareModal();
-        wx.showToast({ title: '链接已复制', icon: 'success' });
-      }
-    });
-  },
-
-  // --- 原有逻辑保持不变 ---
   onPullDownRefresh() {
     this.loadRoomDetail(() => {
       this.checkFavStatus();
@@ -80,6 +34,8 @@ Page({
     db.collection('rooms').doc(this.roomId).get({
       success: res => {
         const d = res.data;
+        // 确保 memberIds 存在 (兼容旧数据)
+        if (!d.memberIds) d.memberIds = [];
         this.processData(d);
         if(cb) cb();
       },
@@ -161,40 +117,109 @@ Page({
     }
   },
 
+  // --- 核心修复：聊天群组逻辑 ---
   handleChat() {
     if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
+    
     const me = this.data.userInfo;
     const owner = this.data.info.publisher;
+    const roommates = this.data.info.memberIds || [];
+
+    // 1. 组装群成员：房主 + 我 + 所有已入住室友
+    // 使用 Set 去重 (防止我自己也是室友，或者房主也是室友导致ID重复)
+    const memberSet = new Set([owner._id, me._id, ...roommates]);
+    const allMembers = Array.from(memberSet);
+
     wx.showLoading({ title: '进入会话...' });
-    let members = [owner._id, me._id]; 
-    db.collection('chats').where({ roomId: this.roomId }).get({
+    
+    // 2. 查找我是否已经在这个房间里有过聊天记录
+    db.collection('chats').where({ 
+        roomId: this.roomId,
+        members: me._id 
+    }).get({
       success: res => {
         if (res.data.length > 0) {
           const chat = res.data[0];
-          if (!chat.members.includes(me._id)) {
-             db.collection('chats').doc(chat._id).update({ data: { members: _.addToSet(me._id) } });
-          }
-          this.navToChat(chat._id, this.data.info.community);
+          
+          // 3. 这是一个已存在的会话，检查成员是否需要更新
+          // (例如：上次聊的时候还没室友，现在有室友了，要把室友拉进来)
+          // 简单的做法是：每次点击都更新一次 members 列表，确保是最新的
+          
+          db.collection('chats').doc(chat._id).update({
+             data: {
+                members: allMembers
+             }
+          }).then(() => {
+             // 甚至可以自动发一条系统消息提示新成员加入，这里先省略
+             this.navToChat(chat._id, this.data.info.community);
+          });
+          
         } else {
-          this.createChat(members);
+          // 4. 我从没聊过，创建新群聊
+          this.createChat(allMembers);
         }
+      },
+      fail: err => {
+          console.error(err);
+          wx.hideLoading();
+          wx.showToast({title: '网络异常', icon: 'none'});
       }
     });
   },
+
   createChat(members) {
     db.collection('chats').add({
       data: {
-        roomId: this.roomId, roomName: this.data.info.community + " 交流群",
-        members: members, lastMessage: '群聊已创建', updateTime: db.serverDate(),
+        roomId: this.roomId, 
+        roomName: this.data.info.community + " 交流群",
+        members: members, 
+        // 初始未读：除了我之外的所有人
+        unreadMembers: members.filter(id => id !== this.data.userInfo._id), 
+        lastMessage: '群聊已创建', 
+        updateTime: db.serverDate(),
         targetAvatar: this.data.info.cover || '' 
       },
-      success: res => { this.navToChat(res._id, this.data.info.community + " 交流群"); }
+      success: res => { 
+          this.navToChat(res._id, this.data.info.community + " 交流群"); 
+      }
     });
   },
+
   navToChat(chatId, title) {
     wx.hideLoading();
     wx.navigateTo({ url: `/pages/chat/chat?id=${chatId}&name=${title}` });
   },
+
+  // --- 分享相关 ---
+  onShareAppMessage() {
+    const title = `【友邻找室友】${this.data.info.community} 招室友啦！`;
+    return {
+      title: title,
+      path: `/pages/detail/detail?id=${this.roomId}`,
+      imageUrl: this.data.info.cover
+    }
+  },
+  openShareModal() { this.setData({ showShareModal: true }); },
+  closeShareModal() { this.setData({ showShareModal: false }); },
+  handleShareTo(e) {
+    const appName = e.currentTarget.dataset.app;
+    const content = `【友邻】${this.data.info.community} 招室友！pages/detail/detail?id=${this.roomId}`;
+    wx.setClipboardData({
+      data: content,
+      success: () => {
+        this.closeShareModal();
+        wx.showModal({ title: '口令已复制', content: `请打开 ${appName} 粘贴`, showCancel: false });
+      }
+    });
+  },
+  handleCopyLink() {
+    wx.setClipboardData({
+      data: `pages/detail/detail?id=${this.roomId}`,
+      success: () => { this.closeShareModal(); wx.showToast({ title: '已复制' }); }
+    });
+  },
+
+  // --- 加入逻辑 ---
   openJoinModal() {
     if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
     if (this.data.info.publisher._id === this.data.userInfo._id) return wx.showToast({title: '不能加入自己的房源', icon: 'none'});
