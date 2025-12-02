@@ -94,8 +94,12 @@ page {
 .other-msg .bubble { background: #FFF; color: #1C1C1E; }
 
 .my-msg { flex-direction: row-reverse; }
-.my-msg .avatar { margin-right: 0; margin-left: 16rpx; display: none; }
-.my-msg .bubble { background: #34C759; color: #FFF; }
+.my-msg .avatar { margin-right: 0; margin-left: 16rpx; display: block; }
+.my-msg .bubble { 
+  background: #34C759; /* 绿色气泡 */
+  color: #FFF; 
+  border-bottom-right-radius: 8rpx; /* 右下角尖 */
+}
 
 .status-row { margin-top: 4rpx; margin-right: 20rpx; text-align: right; }
 .read-txt { font-size: 20rpx; color: #999; }

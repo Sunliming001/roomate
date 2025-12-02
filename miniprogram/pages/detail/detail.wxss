@@ -1,9 +1,8 @@
-/* 顶部样式保持不变... */
+/* ... 顶部和中间样式保持不变 ... */
 .back-btn { position:fixed; left:30rpx; z-index:100; background:rgba(0,0,0,0.5); color:#fff; width:60rpx; height:60rpx; text-align:center; line-height:60rpx; border-radius:50%; font-weight:bold; }
 .swiper { height:500rpx; }
 .slide-img { width:100%; height:100%; }
 .slide-label { position:absolute; bottom:20rpx; right:20rpx; background:rgba(0,0,0,0.6); color:#fff; font-size:24rpx; padding:4rpx 12rpx; border-radius:8rpx; }
-
 .content { position:relative; top:-40rpx; padding:0 30rpx; }
 .card { background:#fff; border-radius:24rpx; padding:30rpx; margin-bottom:20rpx; box-shadow:0 4rpx 20rpx rgba(0,0,0,0.05); }
 .title-card { display:flex; justify-content:space-between; align-items:center; }
@@ -11,7 +10,6 @@
 .price { font-size:36rpx; color:#FF2442; font-weight:bold; }
 .sub { font-size:24rpx; color:#999; font-weight:normal; }
 .st { font-weight:bold; margin-bottom:20rpx; }
-
 .room-row { display:flex; justify-content:space-between; border-bottom:1rpx solid #eee; padding:20rpx 0; }
 .rname { font-weight:bold; font-size:28rpx; }
 .tg { font-size:20rpx; background:#f5f5f5; color:#666; padding:2rpx 8rpx; margin-right:8rpx; border-radius:4rpx; }
@@ -20,22 +18,20 @@
 .occ-info { font-size:24rpx; color:#666; margin-top:4rpx; }
 .vac-price { color:#FF2442; font-weight:bold; }
 .exp-txt { font-size:22rpx; color:#666; }
-
 .pub-card { display:flex; align-items:center; }
 .p-avt { width:80rpx; height:80rpx; border-radius:50%; margin-right:20rpx; background:#eee; }
 .pn { font-weight:bold; font-size:32rpx; }
 .pt { font-size:22rpx; background:#333; color:#fff; padding:2rpx 8rpx; border-radius:6rpx; }
 
 /* 底部栏 */
-.footer-bar { position:fixed; bottom:0; left:0; width:100%; background:#fff; display:flex; align-items:center; padding:20rpx 30rpx; box-sizing:border-box; box-shadow:0 -4rpx 10rpx rgba(0,0,0,0.05); padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); }
+.footer-bar { position:fixed; bottom:0; left:0; width:100%; background:#fff; display:flex; align-items:center; padding:20rpx 30rpx; box-sizing:border-box; box-shadow:0 -4rpx 10rpx rgba(0,0,0,0.05); padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); z-index: 99;}
 .icon-btn { display:flex; flex-direction:column; align-items:center; margin-right:30rpx; color:#666; font-size:20rpx; background: none; padding: 0; line-height: 1.2; border: none;}
 .icon-btn::after { border: none; }
 .icon { font-size: 36rpx; margin-bottom: 4rpx; }
-
 .chat-btn { background:#f0f0f0; color:#333; height:80rpx; border-radius:40rpx; display:flex; align-items:center; justify-content:center; padding:0 40rpx; font-weight:bold; margin-right:20rpx; font-size:28rpx; }
 .join-btn { flex:1; background:#FF2442; color:#fff; height:80rpx; border-radius:40rpx; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:28rpx; margin:0;}
 
-/* 加入弹窗 */
+/* 弹窗 */
 .modal-mask { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; display:flex; align-items:flex-end; }
 .modal-content { width:100%; background:#fff; border-radius:30rpx 30rpx 0 0; padding:40rpx; padding-bottom: calc(40rpx + env(safe-area-inset-bottom)); }
 .m-title { font-size:32rpx; font-weight:bold; margin-bottom:30rpx; text-align:center; }
@@ -44,7 +40,7 @@
 .m-price { color:#FF2442; font-weight:bold; }
 .m-btn { background:#FF2442; color:#fff; font-size:24rpx; padding:10rpx 20rpx; border-radius:30rpx; }
 
-/* 分享弹窗样式 */
+/* 分享弹窗 */
 .share-mask { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:300; display:flex; align-items:flex-end; }
 .share-panel { width:100%; background:#F6F6F6; border-radius:30rpx 30rpx 0 0; padding-bottom: calc(40rpx + env(safe-area-inset-bottom)); }
 .share-title { text-align:center; font-size:28rpx; color:#999; padding:30rpx; background:#fff; border-bottom:1rpx solid #eee; border-radius:30rpx 30rpx 0 0; }

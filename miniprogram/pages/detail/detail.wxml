@@ -63,13 +63,11 @@
 
   <!-- 底部操作栏 -->
   <view class="footer-bar safe-bottom">
-    <!-- 收藏按钮 -->
     <view class="icon-btn" bindtap="handleFav">
       <text class="icon" style="color: {{isFav ? '#FFD700' : '#666'}}">{{isFav ? '★' : '☆'}}</text>
       <text class="txt">{{isFav ? '已收藏' : '收藏'}}</text>
     </view>
     
-    <!-- 新增：分享按钮 -->
     <view class="icon-btn" bindtap="openShareModal">
       <text class="icon">↗</text>
       <text class="txt">分享</text>
@@ -86,7 +84,8 @@
 
   <!-- 加入选择弹窗 -->
   <view class="modal-mask" wx:if="{{showJoinModal}}" bindtap="closeJoinModal">
-    <view class="modal-content" catchtap="true">
+    <!-- catchtap="preventBubble" 阻止点击内容关闭弹窗 -->
+    <view class="modal-content" catchtap="preventBubble">
       <view class="m-title">选择要加入的房间</view>
       <view class="m-list">
         <block wx:for="{{info.rooms}}" wx:key="index">
@@ -100,17 +99,15 @@
     </view>
   </view>
 
-  <!-- 新增：分享选择弹窗 -->
+  <!-- 分享选择弹窗 -->
   <view class="share-mask" wx:if="{{showShareModal}}" bindtap="closeShareModal">
-    <view class="share-panel" catchtap="true">
+    <view class="share-panel" catchtap="preventBubble">
       <view class="share-title">分享到</view>
       <view class="share-grid">
-        <!-- 微信好友 (原生能力) -->
         <button class="share-item" open-type="share">
           <view class="s-icon wx">💬</view>
           <text>微信好友</text>
         </button>
-        <!-- 其他平台 (复制链接) -->
         <view class="share-item" bindtap="handleShareTo" data-app="朋友圈">
           <view class="s-icon pyq">◎</view>
           <text>朋友圈</text>
