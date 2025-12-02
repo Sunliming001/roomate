@@ -118,22 +118,41 @@ Page({
     });
   },
 
+   // --- 核心修复：城市选择逻辑 ---
   onCityChange(e) {
-    const city = e.detail.value[1] + "市"; 
+    const val = e.detail.value; 
+    // val 格式：["江苏省", "南京市", "玄武区"] 或 ["上海市", "市辖区", "徐汇区"]
+    
+    let city = val[1];
+    
+    // 处理直辖市：如果第二位是“市辖区”或“县”，取第一位（如“上海市”）
+    if (city === '市辖区' || city === '县') {
+        city = val[0];
+    }
+
+    // 防止重复加“市”，如用户选的数据本身带市，这里不做额外拼接，直接使用
+    console.log("切换城市为:", city);
+    
     this.setData({ currentCity: city });
-    this.reload();
+    this.loadData();
   },
 
   toCityPage() {
     wx.navigateTo({ url: `/pages/city/city?current=${this.data.currentCity}` });
   },
 
+  // --- 核心修复：搜索调用地图选点 ---
   onSearchTap() {
     const that = this;
     wx.chooseLocation({
       success(res) {
+        // 使用选点的名称作为搜索关键词
         that.setData({ searchKeyword: res.name });
-        that.reload();
+        that.loadData();
+      },
+      fail(err) {
+        // 用户取消或无权限，不处理
+        console.log('取消选点', err);
       }
     });
   },

@@ -2,10 +2,15 @@
   <!-- 顶部导航 -->
   <view class="header" style="padding-top:{{statusBarHeight}}px">
     <view class="row">
-       <view class="city-picker" bindtap="toCityPage">
-         <text>{{currentCity}}</text>
-         <text class="arrow">▾</text>
-       </view>
+       <!-- 核心修复：使用原生 Picker 调用 onCityChange -->
+       <picker mode="region" level="city" bindchange="onCityChange">
+         <view class="city-picker">
+           <text>{{currentCity}}</text>
+           <text class="arrow">▾</text>
+         </view>
+       </picker>
+
+       <!-- 搜索框 (点击跳出地图选点) -->
        <view class="search-box" bindtap="onSearchTap">
          <icon type="search" size="14"></icon>
          <input class="search-input" placeholder="点击搜索小区位置" value="{{searchKeyword}}" disabled="true" />
@@ -22,7 +27,6 @@
        </view>
     </picker>
     
-    <!-- 点击触发滑块弹窗 -->
     <view class="tag {{showPriceSlider?'act':''}}" bindtap="togglePriceSlider">
         {{ (priceMin > 0 || priceMax < 10000) ? (priceMin + '-' + priceMax) : '租金范围' }} ▾
     </view>
@@ -34,38 +38,28 @@
   <view class="slider-box" wx:if="{{showPriceSlider}}">
      <view class="slider-title">
         租金范围 (¥{{priceMin}} - ¥{{priceMax}})
-        <text style="font-size:20rpx; margin-left:10rpx; color:#ccc;"></text>
+        <text style="font-size:20rpx; margin-left:10rpx; color:#ccc;">(步长500)</text>
      </view>
-     
      <view class="slider-container" id="slider-track">
-        <!-- 灰色轨道 -->
         <view class="slider-track"></view>
-        <!-- 高亮条 (淡黄色) -->
         <view class="slider-highlight" style="left:{{leftPercent}}%; width:{{widthPercent}}%"></view>
-        
-        <!-- 左滑块 -->
         <view class="slider-handle" style="left:{{leftPercent}}%" catchtouchmove="onMoveMin">
            <view class="tip">¥{{priceMin}}</view>
         </view>
-        
-        <!-- 右滑块 -->
         <view class="slider-handle" style="left:{{rightPercent}}%" catchtouchmove="onMoveMax">
            <view class="tip">¥{{priceMax}}</view>
         </view>
      </view>
-     
      <view class="slider-btns">
         <button class="reset-btn" size="mini" bindtap="resetPrice">重置</button>
         <button class="confirm-btn" size="mini" bindtap="confirmPrice">确定</button>
      </view>
   </view>
-  
-  <!-- 遮罩 -->
   <view class="mask" wx:if="{{showPriceSlider}}" bindtap="togglePriceSlider"></view>
 
   <view style="height:{{statusBarHeight+44+40}}px"></view>
 
-  <!-- 瀑布流 -->
+  <!-- 瀑布流列表 (修复布局) -->
   <view class="waterfall">
     <view class="col">
       <block wx:for="{{leftList}}" wx:key="_id"><template is="card" data="{{item}}"/></block>
@@ -78,7 +72,6 @@
   <view wx:if="{{leftList.length==0 && rightList.length==0}}" class="empty-tip">当前城市暂无符合条件的房源</view>
 </view>
 
-<!-- 卡片模板 -->
 <template name="card">
   <view class="card" bindtap="goDetail" data-id="{{item._id}}">
     <image src="{{item.cover}}" mode="aspectFill" class="cover"></image>

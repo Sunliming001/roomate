@@ -60,32 +60,53 @@ Page({
     });
   },
 
-  chooseLocation() {
-    const that = this;
-    wx.chooseLocation({
-      success(res) {
-        let city = '南京市'; 
-        const cityMatch = res.address.match(/([^省]+市)/);
-        if (cityMatch && cityMatch[1]) {
-            city = cityMatch[1];
-            if (city.length > 10) city = city.substring(city.length - 3); 
-            if (city.indexOf('省') > -1) city = city.split('省')[1];
-        } else {
-            const directCity = res.address.match(/^(.+?市)/);
-            if(directCity) city = directCity[1];
-        }
-        that.setData({ 
-          'formData.community': res.name,
-          'formData.address': res.address,
-          'formData.city': city, 
-          'formData.location': db.Geo.Point(res.longitude, res.latitude)
-        });
-      },
-      fail(err) {
-        if (err.errMsg.indexOf('auth') > -1) wx.openSetting();
+  // 只需替换 chooseLocation 函数部分，其他保持不变
+ // --- 核心修复：城市名称清洗逻辑 ---
+ chooseLocation() {
+  const that = this;
+  wx.chooseLocation({
+    success(res) {
+      console.log('原始地址:', res.address);
+      let city = '南京市'; // 默认兜底
+
+      // 1. 初步提取
+      const cityMatch = res.address.match(/([^省]+市)/);
+      if (cityMatch && cityMatch[1]) {
+          city = cityMatch[1];
       }
-    });
-  },
+
+      // 2. 【关键修复】针对直辖市强制修正
+      // 如果包含以下关键词，强制锁定为标准名称，解决 "上海市上海市" 问题
+      if (res.address.indexOf('上海') > -1 || city.indexOf('上海') > -1) {
+          city = '上海市';
+      } else if (res.address.indexOf('北京') > -1 || city.indexOf('北京') > -1) {
+          city = '北京市';
+      } else if (res.address.indexOf('天津') > -1 || city.indexOf('天津') > -1) {
+          city = '天津市';
+      } else if (res.address.indexOf('重庆') > -1 || city.indexOf('重庆') > -1) {
+          city = '重庆市';
+      } else {
+          // 3. 对于非直辖市，去掉可能残留的 "省" 字
+          // 例如 "江苏省南京市" -> "南京市"
+          if (city.indexOf('省') > -1) {
+              city = city.split('省')[1];
+          }
+      }
+
+      console.log('清洗后城市:', city);
+
+      that.setData({ 
+        'formData.community': res.name,
+        'formData.address': res.address,
+        'formData.city': city, 
+        'formData.location': db.Geo.Point(res.longitude, res.latitude)
+      });
+    },
+    fail(err) {
+      if (err.errMsg.indexOf('auth') > -1) wx.openSetting();
+    }
+  });
+},
 
   onRoomCountInput(e) {
     let count = parseInt(e.detail.value);
