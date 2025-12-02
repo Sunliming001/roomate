@@ -20,48 +20,14 @@ Page({
 
   onLoad(opts) {
     this.roomId = opts.id;
-    this.loadRoomDetail();
-  },
-
-  // --- 空函数：用于阻止事件冒泡 ---
-  preventBubble() {
-    // 这是一个空函数，专门用于 catchtap
-  },
-
-  onShareAppMessage() {
-    const title = `【友邻找室友】${this.data.info.community} 招室友啦！`;
-    const imageUrl = this.data.info.cover;
-    return {
-      title: title,
-      path: `/pages/detail/detail?id=${this.roomId}`,
-      imageUrl: imageUrl
+    
+    const user = wx.getStorageSync('my_user_info');
+    if (!user) {
+        wx.redirectTo({ url: `/pages/login/login?redirectId=${this.roomId}` });
+        return;
     }
-  },
-
-  // --- 分享弹窗控制 ---
-  openShareModal() { this.setData({ showShareModal: true }); },
-  closeShareModal() { this.setData({ showShareModal: false }); },
-
-  handleShareTo(e) {
-    const appName = e.currentTarget.dataset.app;
-    const content = `【友邻】${this.data.info.community} 招室友！pages/detail/detail?id=${this.roomId}`;
-    wx.setClipboardData({
-      data: content,
-      success: () => {
-        this.closeShareModal();
-        wx.showModal({ title: '口令已复制', content: `请打开 ${appName} 粘贴`, showCancel: false });
-      }
-    });
-  },
-
-  handleCopyLink() {
-    wx.setClipboardData({
-      data: `pages/detail/detail?id=${this.roomId}`,
-      success: () => {
-        this.closeShareModal();
-        wx.showToast({ title: '已复制' });
-      }
-    });
+    
+    this.loadRoomDetail();
   },
 
   onPullDownRefresh() {
@@ -71,10 +37,17 @@ Page({
     });
   },
 
+  goBack() { 
+    const pages = getCurrentPages();
+    if (pages.length > 1) wx.navigateBack();
+    else wx.switchTab({ url: '/pages/index/index' });
+  },
+
   loadRoomDetail(cb) {
     db.collection('rooms').doc(this.roomId).get({
       success: res => {
         const d = res.data;
+        if (!d.memberIds) d.memberIds = [];
         this.processData(d);
         if(cb) cb();
       },
@@ -83,6 +56,7 @@ Page({
   },
 
   processData(d) {
+    // 1. 相册处理
     const gallery = [];
     if (d.rooms) {
       d.rooms.forEach(r => {
@@ -91,6 +65,21 @@ Page({
     }
     if(gallery.length==0) gallery.push({ url: '/images/default-room.png', name: '暂无照片' });
 
+    // 2. 宠物信息处理 (新增逻辑)
+    let petText = '';
+    const pets = d.pets || [];
+    if (pets.includes('none')) {
+        petText = '🚫 不接受养宠';
+    } else if (pets.length > 0) {
+        const map = { 'cat': '🐱 接受猫', 'dog': '🐶 接受狗' };
+        const labels = pets.filter(k => k !== 'none').map(k => map[k] || k);
+        petText = labels.join('  ');
+    } else {
+        petText = '⭕ 宠物要求不限'; // 默认情况
+    }
+    d.petDisplay = petText;
+
+    // 3. 格式化入住信息
     d.rooms.forEach(r => {
       if(r.status==1) {
          if(r.isMeIndex==0) { 
@@ -110,8 +99,6 @@ Page({
     });
     this.setData({ info: d, gallery });
   },
-
-  goBack() { wx.navigateBack(); },
   
   previewImg(e) {
       const urls = this.data.gallery.map(i => i.url);
@@ -158,18 +145,14 @@ Page({
 
   handleChat() {
     if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
+    
     const me = this.data.userInfo;
     const owner = this.data.info.publisher;
-    
-    // 自己不能跟自己聊
-    if(me._id === owner._id) {
-         return wx.switchTab({ url: '/pages/message/message' });
-    }
+    const roommates = this.data.info.memberIds || [];
+
+    if(me._id === owner._id) return wx.switchTab({ url: '/pages/message/message' });
 
     wx.showLoading({ title: '进入会话...' });
-    
-    // 获取已入住成员
-    const roommates = this.data.info.memberIds || [];
     const memberSet = new Set([owner._id, me._id, ...roommates]);
     const allMembers = Array.from(memberSet);
 
@@ -182,7 +165,8 @@ Page({
         } else {
           this.createChat(allMembers);
         }
-      }
+      },
+      fail: () => wx.hideLoading()
     });
   },
 
@@ -204,13 +188,39 @@ Page({
     wx.navigateTo({ url: `/pages/chat/chat?id=${chatId}&name=${title}` });
   },
 
+  onShareAppMessage() {
+    return {
+      title: `【友邻找室友】${this.data.info.community} 招室友啦！`,
+      path: `/pages/detail/detail?id=${this.roomId}`,
+      imageUrl: this.data.info.cover
+    }
+  },
+  openShareModal() { this.setData({ showShareModal: true }); },
+  closeShareModal() { this.setData({ showShareModal: false }); },
+  handleShareTo(e) {
+    const appName = e.currentTarget.dataset.app;
+    wx.setClipboardData({
+      data: `【友邻】${this.data.info.community} 招室友！pages/detail/detail?id=${this.roomId}`,
+      success: () => {
+        this.closeShareModal();
+        wx.showModal({ title: '口令已复制', content: `请打开 ${appName} 粘贴`, showCancel: false });
+      }
+    });
+  },
+  handleCopyLink() {
+    wx.setClipboardData({
+      data: `pages/detail/detail?id=${this.roomId}`,
+      success: () => { this.closeShareModal(); wx.showToast({ title: '已复制' }); }
+    });
+  },
+
   openJoinModal() {
     if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
     if (this.data.info.publisher._id === this.data.userInfo._id) return wx.showToast({title: '不能加入自己的房源', icon: 'none'});
     this.setData({ showJoinModal: true });
   },
   closeJoinModal() { this.setData({ showJoinModal: false }); },
-
+  
   confirmJoin(e) {
     const { idx, name } = e.currentTarget.dataset;
     const me = this.data.userInfo;
@@ -227,5 +237,6 @@ Page({
       },
       fail: () => { wx.hideLoading(); wx.showToast({title:'失败', icon:'none'}); }
     });
-  }
+  },
+  preventBubble() {}
 })

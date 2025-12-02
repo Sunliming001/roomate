@@ -14,13 +14,28 @@
       <text class="lbl">户型</text>
       <view class="flex">
         <input class="s-in" type="number" placeholder="3" bindinput="onRoomCountInput" value="{{formData.layout.room}}"/> 室
-        <input class="s-in" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.hall"/> 厅
-        <input class="s-in" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.toilet"/> 卫
+        <input class="s-in" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.hall" value="{{formData.layout.hall}}"/> 厅
+        <input class="s-in" type="number" placeholder="1" bindinput="bindInput" data-path="formData.layout.toilet" value="{{formData.layout.toilet}}"/> 卫
       </view>
     </view>
     <view class="row">
       <text class="lbl">总租金</text>
       <input class="val-in" type="digit" placeholder="0" bindinput="bindInput" data-path="formData.totalPrice" value="{{formData.totalPrice}}"/>
+    </view>
+    
+    <!-- 新增：宠物要求 -->
+    <view class="row" style="height:auto; padding: 20rpx 0; display:block;">
+      <view class="lbl" style="margin-bottom:16rpx;">宠物要求 (可多选)</view>
+      <view class="pet-group">
+         <block wx:for="{{petOpts}}" wx:key="key">
+            <!-- 检查数组中是否包含该key，高亮显示 -->
+            <view 
+              class="pet-tag {{utils.includes(formData.pets, item.key) ? 'active' : ''}}" 
+              bindtap="togglePet" 
+              data-key="{{item.key}}"
+            >{{item.name}}</view>
+         </block>
+      </view>
     </view>
   </view>
 
@@ -39,7 +54,6 @@
         <view class="flex mb">
           <input class="m-in" placeholder="名称(主卧)" value="{{item.name}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="name"/>
           <input class="m-in" placeholder="面积㎡" type="digit" value="{{item.area}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="area"/>
-          <!-- 修复：无论招募还是入住，都需要填租金以便校验总和 -->
           <input class="m-in red" type="digit" placeholder="租金" value="{{item.price}}" bindinput="updateRoomField" data-idx="{{index}}" data-field="price"/>
         </view>
         <view class="flex mb">
@@ -58,7 +72,6 @@
              </picker>
            </view>
            
-           <!-- 否：显示规整的 Grid UI -->
            <view wx:if="{{item.isMeIndex==1}}" class="grid-form">
              <picker range="{{genderOptions}}" value="{{item.occupant.genderIndex}}" bindchange="onOccGenderChange" data-idx="{{index}}">
                 <view class="grid-item">
@@ -100,3 +113,10 @@
   <view style="height:200rpx"></view>
   <button class="pub-btn" bindtap="submit">发布找舍友</button>
 </view>
+
+<!-- WXS 工具类：用于判断数组包含 -->
+<wxs module="utils">
+module.exports.includes = function(arr, item) {
+  return arr && arr.indexOf(item) > -1;
+}
+</wxs>

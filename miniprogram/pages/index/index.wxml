@@ -2,15 +2,12 @@
   <!-- 顶部导航 -->
   <view class="header" style="padding-top:{{statusBarHeight}}px">
     <view class="row">
-       <!-- 核心修复：使用原生 Picker 调用 onCityChange -->
        <picker mode="region" level="city" bindchange="onCityChange">
          <view class="city-picker">
            <text>{{currentCity}}</text>
            <text class="arrow">▾</text>
          </view>
        </picker>
-
-       <!-- 搜索框 (点击跳出地图选点) -->
        <view class="search-box" bindtap="onSearchTap">
          <icon type="search" size="14"></icon>
          <input class="search-input" placeholder="点击搜索小区位置" value="{{searchKeyword}}" disabled="true" />
@@ -19,22 +16,39 @@
     </view>
   </view>
 
-  <!-- 筛选栏 -->
+  <!-- 筛选栏 (两行布局，防止拥挤) -->
   <view class="filters" style="top:{{statusBarHeight+44}}px">
+    <!-- 1. 排序 -->
+    <picker range="{{['最新发布','收藏最多']}}" bindchange="onSortChange">
+       <view class="tag {{sortType=='hot' ? 'act' : ''}}">
+         {{sortType=='hot'?'收藏最多':'最新发布'}} ▾
+       </view>
+    </picker>
+    
+    <!-- 2. 性别 -->
     <picker range="{{['全部','招男生','招女生','不限']}}" bindchange="onFilterGender">
        <view class="tag {{filter.gender > 0 ? 'act' : ''}}">
          {{ filter.gender > 0 ? ['全部','招男生','招女生','不限'][filter.gender] : '期望性别' }} ▾
        </view>
     </picker>
     
+    <!-- 3. 租金 -->
     <view class="tag {{showPriceSlider?'act':''}}" bindtap="togglePriceSlider">
-        {{ (priceMin > 0 || priceMax < 10000) ? (priceMin + '-' + priceMax) : '租金范围' }} ▾
+        {{ (priceMin > 0 || priceMax < 10000) ? (priceMin + '-' + priceMax) : '租金' }} ▾
     </view>
+
+    <!-- 4. 宠物 (新增) -->
+    <picker range="{{['不限','不接受养宠','接受养猫','接受养狗']}}" bindchange="onPetChange">
+       <view class="tag {{filter.pet!=='不限' ? 'act' : ''}}">
+         {{filter.pet === '不限' ? '宠物要求' : filter.pet}} ▾
+       </view>
+    </picker>
     
+    <!-- 5. 独卫 -->
     <view class="tag {{filter.ensuite?'act':''}}" bindtap="toggleEnsuite">独卫</view>
   </view>
 
-  <!-- 租金滑块弹层 -->
+  <!-- 租金滑块 (保持不变) -->
   <view class="slider-box" wx:if="{{showPriceSlider}}">
      <view class="slider-title">
         租金范围 (¥{{priceMin}} - ¥{{priceMax}})
@@ -57,9 +71,10 @@
   </view>
   <view class="mask" wx:if="{{showPriceSlider}}" bindtap="togglePriceSlider"></view>
 
-  <view style="height:{{statusBarHeight+44+40}}px"></view>
+  <!-- 占位高度需要增加，因为筛选栏可能变高了 -->
+  <view style="height:{{statusBarHeight+44+50}}px"></view>
 
-  <!-- 瀑布流列表 (修复布局) -->
+  <!-- 列表 -->
   <view class="waterfall">
     <view class="col">
       <block wx:for="{{leftList}}" wx:key="_id"><template is="card" data="{{item}}"/></block>

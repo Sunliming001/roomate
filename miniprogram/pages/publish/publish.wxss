@@ -1,56 +1,40 @@
-/* 保持顶部的全局盒模型设置 */
-page { 
-  background: #F6F6F6; 
-  box-sizing: border-box; 
-  width: 100%;
-  overflow-x: hidden;
-}
+/* 全局设置保持不变 */
+page { background: #F6F6F6; box-sizing: border-box; width: 100%; overflow-x: hidden; }
 view, text, input, picker, textarea { box-sizing: border-box; }
-
 .container { padding: 0 30rpx 200rpx 30rpx; width: 100%; }
 
-.page-title { font-size: 44rpx; font-weight: 900; margin-bottom: 30rpx; color: #cc093a; }
-
-.card { 
-  background: #fff; 
-  border-radius: 24rpx; 
-  padding: 0 30rpx; 
+/* 核心修改：标题微调 */
+.page-title { 
+  font-size: 40rpx; /* 改小一点，更精致 */
+  font-weight: 800; 
   margin-bottom: 30rpx; 
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.02); 
-  width: 100%;
+  color: #1C1C1E; 
+  padding-left: 10rpx; /* 稍微增加左内边距 */
 }
 
-.row { 
-  height: 110rpx; 
-  display: flex; justify-content: space-between; align-items: center; 
-  border-bottom: 1rpx solid #f5f5f5; 
-}
+/* 以下样式保持不变，与之前一致 */
+.card { background: #fff; border-radius: 24rpx; padding: 0 30rpx; margin-bottom: 30rpx; box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.02); width: 100%; }
+.row { height: 110rpx; display: flex; justify-content: space-between; align-items: center; border-bottom: 1rpx solid #f5f5f5; }
 .row:last-child { border: none; }
 .row.click:active { background: #fcfcfc; margin: 0 -30rpx; padding: 0 30rpx; }
-
 .lbl { font-weight: bold; font-size: 30rpx; color: #333; min-width: 140rpx; }
 .val-box { flex: 1; display: flex; justify-content: flex-end; align-items: center; overflow: hidden;}
 .val-txt { font-weight: bold; font-size: 30rpx; color: #333; max-width: 400rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: right;}
 .val-txt.ph { color: #999; font-weight: normal; }
 .arrow { color: #ccc; font-family: monospace; margin-left: 10rpx; }
-
 .flex { display: flex; align-items: center; color: #666; font-size: 28rpx; }
 .s-in { width: 80rpx; height: 70rpx; background: #F5F5F7; text-align: center; border-radius: 12rpx; margin: 0 10rpx; font-weight: bold; color: #333; }
 .s-in.highlight { background: #FFF0F5; color: #FF2442; }
 .val-in { text-align: right; font-weight: bold; width: 200rpx; font-size: 32rpx; }
-
 .room-card { padding: 30rpx; border: 2rpx solid transparent; }
 .room-card.occ { background: #fafafa; border-color: #eee; }
-
 .r-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
 .badge { font-size: 30rpx; font-weight: 900; color: #FF2442; }
 .sw-box { font-size: 24rpx; color: #999; display: flex; align-items: center; gap: 10rpx; }
-
 .mb { margin-bottom: 24rpx; }
 .m-in { background: #F9F9F9; height: 72rpx; border-radius: 12rpx; padding: 0 16rpx; font-size: 26rpx; text-align: center; font-weight: bold; color: #333; flex: 1; margin-right: 16rpx; }
 .m-in.red { color: #FF2442; }
 .ensuite-box { display: flex; align-items: center; font-size: 24rpx; color: #666; gap: 6rpx; }
-
 .sec-box { background: #F5F5F7; padding: 24rpx; border-radius: 16rpx; margin-bottom: 24rpx; }
 .p-row { display: flex; justify-content: space-between; align-items: center; font-size: 28rpx; margin-bottom: 16rpx; }
 .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
@@ -59,24 +43,23 @@ view, text, input, picker, textarea { box-sizing: border-box; }
 .g-val { font-weight: bold; font-size: 28rpx; color: #333; }
 .g-in { text-align: right; font-weight: bold; font-size: 28rpx; flex: 1; width: 100%; }
 .input-item { grid-column: span 2; flex-direction: row; justify-content: space-between; padding: 16rpx 30rpx; }
-
 .photo-upload { width: 180rpx; height: 240rpx; border: 2rpx dashed #ddd; border-radius: 12rpx; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; background: #fff; margin-top: 20rpx; }
 .pv-img { width: 100%; height: 100%; }
 .tip { font-size: 22rpx; color: #999; }
+.bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 20rpx 40rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom)); box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.05); z-index: 99; }
+.pub-btn { background: #FF2442; color: #fff; font-weight: bold; height: 96rpx; line-height: 96rpx; border-radius: 48rpx; width: 100% !important; margin: 0; box-shadow: 0 10rpx 24rpx rgba(255, 36, 66, 0.3); }
+/* ... 保持之前的样式 ... */
 
-/* 底部按钮 - 小红书风格回归 */
-.bottom-bar {
-  position: fixed; bottom: 0; left: 0; width: 100%; background: #fff;
-  padding: 20rpx 40rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.05); z-index: 99;
+/* 宠物标签样式 */
+.pet-group { display: flex; gap: 20rpx; margin-top: 10rpx; }
+.pet-tag { 
+  padding: 12rpx 30rpx; background: #F5F5F7; color: #666; 
+  border-radius: 40rpx; font-size: 26rpx; transition: all 0.2s;
+  border: 2rpx solid transparent;
 }
-.pub-btn {
-  background: #FF2442; /* 经典小红书红 */
-  color: #fff; 
-  font-weight: bold; 
-  height: 96rpx; line-height: 96rpx; 
-  border-radius: 48rpx; 
-  width: 100% !important; 
-  margin: 0;
-  box-shadow: 0 10rpx 24rpx rgba(255, 36, 66, 0.3); /* 增加一点光晕 */
+.pet-tag.active { 
+  background: #333; color: #fff; font-weight: bold; 
+  box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.1);
 }
+
+/* ... */

@@ -31,29 +31,29 @@ page { background: #F2F2F7; }
 .search-input { flex: 1; font-size: 28rpx; margin-left: 12rpx; height: 100%; color: #000; }
 .clear-icon { font-size: 32rpx; color: #8E8E93; padding: 10rpx; }
 
-/* 筛选栏 */
+/* ... 其他不变 ... */
+
 .filters { 
-  position: fixed; left: 0; width: 100%; height: 90rpx; 
-  background: rgba(255, 255, 255, 0.95); 
-  display: flex; align-items: center; padding: 0 32rpx; gap: 20rpx; z-index: 98; 
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.02);
+  position: fixed; left: 0; width: 100%; 
+  height: 90rpx; /* 稍微增高 */
+  background: #fff; 
+  display: flex; align-items: center; 
+  padding: 0 20rpx; gap: 16rpx; /* 间距调小 */
+  z-index: 98; border-bottom: 1rpx solid #eee; 
+  white-space: nowrap; overflow-x: auto; /* 允许横向滚动 */
 }
+/* 隐藏滚动条 */
+.filters::-webkit-scrollbar { display: none; }
+
 .tag { 
-  padding: 12rpx 28rpx; 
-  background: #F2F2F7; 
-  border-radius: 30rpx; 
-  font-size: 26rpx; 
-  color: #1C1C1E; 
-  font-weight: 500;
-  border: 1rpx solid transparent;
-  transition: all 0.2s;
+  padding: 10rpx 20rpx; 
+  background: #f5f5f5; border-radius: 30rpx; 
+  font-size: 24rpx; color: #666; 
+  flex-shrink: 0; /* 防止被压缩 */
 }
-.tag.act { 
-  background: #1C1C1E; /* 选中变黑，像 iOS 的 Tag */
-  color: #FFF; 
-  font-weight: 600;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.15);
-}
+.tag.act { background: #333; color: #fff; font-weight: bold; }
+
+/* ... 其他不变 ... */
 
 /* 瀑布流 */
 .waterfall { display: flex; justify-content: space-between; padding: 20rpx 24rpx; }
@@ -76,9 +76,17 @@ page { background: #F2F2F7; }
   line-height: 1.4;
 }
 .dots { display: flex; align-items: center; gap: 8rpx; margin-bottom: 16rpx; }
-.dot { width: 14rpx; height: 14rpx; border-radius: 50%; border: 2rpx solid #C7C7CC; box-sizing: border-box; }
-.dot.male { background: #34C759; border: none; } /* iOS Green */
-.dot.female { background: #FF2442; border: none; } 
+/* 仅列出修改部分，其他保持不变 */
+
+/* ... */
+
+.dot { width:16rpx; height:16rpx; border-radius:50%; border:2rpx solid #ccc; box-sizing: border-box; }
+
+/* 核心修改：配色 */
+.dot.male { background: #4FA9FF; border: none; } /* 蓝色 */
+.dot.female { background: #FF85C0; border: none; } /* 粉色 */
+
+/* ... */ 
 .dist { font-size: 22rpx; color: #8E8E93; margin-left: auto; background: #F2F2F7; padding: 4rpx 10rpx; border-radius: 8rpx; }
 
 .btm { display: flex; justify-content: space-between; align-items: center; margin-top: 10rpx; }

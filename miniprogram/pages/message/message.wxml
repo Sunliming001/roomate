@@ -2,23 +2,20 @@
   <view class="tabs">
     <view class="tab {{curTab==0?'active':''}}" bindtap="switchTab" data-idx="0">
       聊天
-      <!-- 顶部聊天 Tab 红点 (逻辑2) -->
       <view class="dot" wx:if="{{hasUnreadChat}}"></view>
     </view>
     <view class="tab {{curTab==1?'active':''}}" bindtap="switchTab" data-idx="1">
       通知 
-      <!-- 顶部通知 Tab 红点 (逻辑3) -->
       <view class="dot" wx:if="{{hasUnreadNotif}}"></view>
     </view>
   </view>
 
-  <!-- 聊天列表 -->
+  <!-- 0: 聊天列表 -->
   <view wx:if="{{curTab==0}}" class="list-box">
     <block wx:for="{{chatList}}" wx:key="_id">
       <view class="chat-item" bindtap="goChat" data-id="{{item._id}}" data-name="{{item.roomName}}">
         <view class="avatar-box">
            <image class="avatar" src="{{item.targetAvatar}}"></image>
-           <!-- 聊天框右上角小红点 (逻辑1) -->
            <view class="red-badge" wx:if="{{item.hasUnread}}"></view>
         </view>
         <view class="content">
@@ -32,17 +29,21 @@
         </view>
       </view>
     </block>
-    <view wx:if="{{chatList.length==0}}" class="empty">暂无聊天</view>
+    <!-- 美化后的空状态 -->
+    <view wx:if="{{chatList.length==0}}" class="empty-container">
+      <image class="empty-img" src="/images/empty_chat.png" wx:if="{{false}}"></image> <!-- 只有你有图时才开 -->
+      <view class="empty-icon">💬</view>
+      <view class="empty-text">暂时没有聊天消息</view>
+      <view class="empty-sub">去首页找个喜欢的房源聊聊吧</view>
+    </view>
   </view>
 
-  <!-- 通知列表 -->
+  <!-- 1: 通知列表 -->
   <view wx:if="{{curTab==1}}" class="list-box">
     <block wx:for="{{notifList}}" wx:key="_id">
-      <!-- 普通通知 -->
       <view class="notif-card simple" wx:if="{{item.type !== 'join_req'}}" bindtap="readNotification" data-id="{{item._id}}" data-read="{{item.isRead}}">
         <view class="n-icon">
            {{item.icon}}
-           <!-- 通知项红点 -->
            <view class="mini-dot" wx:if="{{!item.isRead}}"></view>
         </view>
         <view class="n-info">
@@ -52,7 +53,6 @@
         </view>
       </view>
 
-      <!-- 申请通知 -->
       <view class="notif-card req" wx:if="{{item.type === 'join_req'}}">
         <view class="req-head">
            <text class="rh-t">申请加入 <text class="mini-dot" wx:if="{{!item.isRead}}"></text></text>
@@ -75,6 +75,10 @@
         </view>
       </view>
     </block>
-    <view wx:if="{{notifList.length==0}}" class="empty">暂无通知</view>
+    <!-- 美化后的空状态 -->
+    <view wx:if="{{notifList.length==0}}" class="empty-container">
+      <view class="empty-icon">🔔</view>
+      <view class="empty-text">暂时没有新通知</view>
+    </view>
   </view>
 </view>

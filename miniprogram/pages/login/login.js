@@ -4,9 +4,7 @@ const db = wx.cloud.database();
 Page({
   data: {
     userInfo: { gender: 1 },
-    // 选中的标签字典 { '标签名': true }
     tags: {},
-    // 预设标签库
     tagOptions: [
       '作息规律', '爱干净', '不抽烟', '宠物友好', 
       'I人', 'E人', '社牛', '社恐',
@@ -14,78 +12,67 @@ Page({
       '二次元', '游戏开黑', '健身达人', '追剧',
       '音乐', '摄影', '旅行', '极简主义'
     ],
-    // 用户手动添加的额外标签列表
     extraTags: [],
-    inputTagVal: ''
+    inputTagVal: '',
+    // 新增：用于存储这就跳转的目标ID
+    redirectId: null 
+  },
+
+  // --- 核心修复：接收重定向参数 ---
+  onLoad(options) {
+    if (options.redirectId) {
+        console.log('检测到重定向需求，目标房间ID:', options.redirectId);
+        this.setData({ redirectId: options.redirectId });
+    }
   },
 
   onChooseAvatar(e) { this.setData({ 'userInfo.avatarUrl': e.detail.avatarUrl }) },
   onNickNameChange(e) { this.setData({ 'userInfo.nickName': e.detail.value }) },
-  bindInput(e) { this.setData({ 'userInfo.job': e.detail.value }) },
+  bindInput(e) { this.setData({ [`userInfo.${e.currentTarget.dataset.key}`]: e.detail.value }) },
   setGender(e) { this.setData({ 'userInfo.gender': e.currentTarget.dataset.v }) },
   
-  // 切换标签选中状态
   toggleTag(e) {
     const t = e.currentTarget.dataset.tag;
     const tags = this.data.tags;
     
     if (tags[t]) {
-      // 如果已选中，则取消
       delete tags[t];
     } else {
-      // --- 修改点：限制最多选4个 ---
-      if (Object.keys(tags).length >= 4) {
-        return wx.showToast({ title: '最多选4个标签', icon: 'none' });
-      }
-      tags[t] = true;
+       if (Object.keys(tags).length >= 4) {
+         return wx.showToast({ title: '最多选4个', icon: 'none' });
+       }
+       tags[t] = true;
     }
     this.setData({ tags });
   },
 
-  // 输入自定义标签
-  onTagInput(e) {
-    this.setData({ inputTagVal: e.detail.value });
-  },
+  onTagInput(e) { this.setData({ inputTagVal: e.detail.value }) },
 
-  // 添加自定义标签
   addCustomTag() {
     const val = this.data.inputTagVal.trim();
     if (!val) return;
-    if (val.length > 6) return wx.showToast({ title: '标签太长啦', icon: 'none' });
+    if (val.length > 6) return wx.showToast({ title: '标签太长', icon: 'none' });
     
     const tags = this.data.tags;
-
-    // 如果当前还没选中这个标签，且数量已满4个，则阻止
     if (!tags[val] && Object.keys(tags).length >= 4) {
-        return wx.showToast({ title: '最多选4个标签', icon: 'none' });
+        return wx.showToast({ title: '最多选4个', icon: 'none' });
     }
-
-    // 检查是否已存在于预设或额外列表中
-    if (this.data.tagOptions.includes(val) || this.data.extraTags.includes(val)) {
-      tags[val] = true; // 直接选中
-      this.setData({ tags, inputTagVal: '' });
-      return;
+    
+    tags[val] = true; 
+    if (!this.data.tagOptions.includes(val) && !this.data.extraTags.includes(val)) {
+       const ex = this.data.extraTags;
+       ex.push(val);
+       this.setData({ extraTags: ex });
     }
-
-    // 添加到额外列表并选中
-    const extra = this.data.extraTags;
-    extra.push(val);
-    tags[val] = true;
-
-    this.setData({
-      extraTags: extra,
-      tags: tags,
-      inputTagVal: ''
-    });
+    this.setData({ tags, inputTagVal: '' });
   },
   
   submit() {
     const u = this.data.userInfo;
     if(!u.avatarUrl || !u.nickName) return wx.showToast({title:'请完善头像昵称', icon:'none'});
     
-    // 至少选一个标签
     const selectedTags = Object.keys(this.data.tags);
-    if (selectedTags.length === 0) return wx.showToast({title:'请至少选个标签', icon:'none'});
+    if (selectedTags.length === 0) return wx.showToast({title:'请至少选1个标签', icon:'none'});
 
     wx.showLoading({ title: '创建新身份...' });
     
@@ -98,7 +85,7 @@ Page({
     this.uploadAvatar(u.avatarUrl).then(cloudAvatarUrl => {
         finalData.avatarUrl = cloudAvatarUrl;
         
-        // 注册新用户
+        // 直接创建新用户
         db.collection('users').add({
             data: finalData
         }).then(res => {
@@ -127,6 +114,7 @@ Page({
       });
   },
 
+  // --- 核心修复：登录完成后的跳转逻辑 ---
   finishLogin(userData) {
       wx.setStorageSync('my_user_info', userData);
       if (app.loginSuccess) {
@@ -134,7 +122,18 @@ Page({
       } else {
           app.globalData.userInfo = userData;
       }
+      
       wx.hideLoading();
-      wx.reLaunch({ url: '/pages/index/index' });
+
+      // 判断去向
+      if (this.data.redirectId) {
+          // 如果有重定向ID，说明是点分享进来的，跳回详情页
+          wx.redirectTo({
+              url: `/pages/detail/detail?id=${this.data.redirectId}`
+          });
+      } else {
+          // 正常登录，去首页
+          wx.reLaunch({ url: '/pages/index/index' });
+      }
   }
 })

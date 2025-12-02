@@ -1,92 +1,54 @@
-/* pages/message/message.wxss */
-page { background: #FFF; } /* 消息页通常用纯白背景显得干净 */
+page { background: #fff; }
+.tabs { display: flex; padding: 0 30rpx; border-bottom: 1rpx solid #eee; margin-bottom: 10rpx; }
+.tab { font-size: 32rpx; color: #999; margin-right: 40rpx; padding: 20rpx 0; position: relative; }
+.tab.active { color: #1C1C1E; font-weight: bold; font-size: 36rpx; }
+.dot { width: 16rpx; height: 16rpx; background: #FF2442; border-radius: 50%; position: absolute; top: 16rpx; right: -12rpx; }
 
-/* 顶部 Tabs */
-.tabs { 
-  display: flex; 
-  padding: 0 40rpx; 
-  border-bottom: 1rpx solid #F2F2F7; 
-  background: #FFF;
-  position: relative;
-  z-index: 10;
-}
-.tab { 
-  font-size: 32rpx; color: #8E8E93; 
-  margin-right: 60rpx; padding: 24rpx 0; 
-  position: relative; 
-  transition: all 0.3s;
-}
-.tab.active { 
-  color: #1C1C1E; font-weight: 600; font-size: 40rpx; 
-}
-.dot { 
-  width: 12rpx; height: 12rpx; background: #FF3B30; /* iOS Red */
-  border-radius: 50%; position: absolute; top: 24rpx; right: -10rpx; 
-}
+.list-box { padding-bottom: 100rpx; min-height: 60vh; }
 
-.list-box { padding-bottom: 120rpx; }
-
-/* 聊天列表项 */
-.chat-item { 
-  display: flex; padding: 30rpx 32rpx; 
-  background: #FFF;
-  transition: background 0.2s;
-}
-.chat-item:active { background: #F2F2F7; }
-
+.chat-item { display: flex; padding: 24rpx 30rpx; align-items: center; }
+.chat-item:active { background: #f9f9f9; }
 .avatar-box { position: relative; margin-right: 24rpx; }
-.avatar { width: 104rpx; height: 104rpx; border-radius: 16rpx; background: #F2F2F7; }
-.red-badge { 
-  width: 20rpx; height: 20rpx; background: #FF3B30; 
-  border-radius: 50%; position: absolute; top: -4rpx; right: -4rpx; 
-  border: 3rpx solid #FFF; 
-}
+.avatar { width: 96rpx; height: 96rpx; border-radius: 16rpx; background: #f2f2f2; }
+.red-badge { width: 20rpx; height: 20rpx; background: #FF2442; border-radius: 50%; position: absolute; top: -6rpx; right: -6rpx; border: 2rpx solid #fff; }
 
-.content { 
-  flex: 1; 
-  display: flex; flex-direction: column; justify-content: center;
-  border-bottom: 1rpx solid #F2F2F7; 
-  padding-bottom: 4rpx;
-}
-.top { display: flex; justify-content: space-between; margin-bottom: 10rpx; align-items: baseline;}
-.name { font-size: 34rpx; font-weight: 500; color: #1C1C1E; }
-.time { font-size: 24rpx; color: #AEAEB2; }
-
+.content { flex: 1; border-bottom: 1rpx solid #f0f0f0; padding-bottom: 24rpx; }
+.top { display: flex; justify-content: space-between; margin-bottom: 8rpx; }
+.name { font-size: 32rpx; font-weight: 500; color: #1C1C1E; }
+.time { font-size: 24rpx; color: #ccc; }
 .btm { display: flex; }
-.last-msg { 
-  font-size: 28rpx; color: #8E8E93; 
-  overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 500rpx; 
-}
+.last-msg { font-size: 26rpx; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500rpx; }
 
-/* 通知卡片 - 仿 iOS 通知中心 */
-.notif-card { 
-  margin: 24rpx 32rpx; padding: 30rpx; 
-  background: rgba(255, 255, 255, 0.8); 
-  box-shadow: 0 8rpx 30rpx rgba(0,0,0,0.06); 
-  border-radius: 24rpx; 
-  border: 1rpx solid rgba(0,0,0,0.03);
-  position: relative; 
-  backdrop-filter: blur(10px);
-}
-
-.n-icon { font-size: 48rpx; margin-right: 24rpx; width: 80rpx; text-align: center; }
-.mini-dot { width: 16rpx; height: 16rpx; background: #FF3B30; border-radius: 50%; position: absolute; top: 0; right: 0; border: 2rpx solid #fff;}
+.notif-card { margin: 20rpx 30rpx; padding: 30rpx; background: #fff; box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.04); border-radius: 16rpx; border: 1rpx solid #f5f5f5; position: relative; }
+.n-icon { font-size: 40rpx; margin-right: 24rpx; width: 60rpx; text-align: center; position: relative; }
+.mini-dot { width: 12rpx; height: 12rpx; background: #FF2442; border-radius: 50%; position: absolute; top: 0; right: 0; }
 
 .notif-card.simple { display: flex; align-items: flex-start;}
 .n-info { flex: 1; }
-.n-title { font-weight: 600; font-size: 30rpx; margin-bottom: 8rpx; color: #1C1C1E;}
-.n-desc { font-size: 28rpx; color: #666; margin-bottom: 12rpx; line-height: 1.4;}
-.n-time { font-size: 22rpx; color: #AEAEB2; }
+.n-title { font-weight: bold; font-size: 30rpx; margin-bottom: 8rpx; color:#333;}
+.n-desc { font-size: 28rpx; color: #666; margin-bottom: 8rpx; }
+.n-time { font-size: 22rpx; color: #ccc; }
 
-/* 申请卡片 */
-.req-head { display: flex; justify-content: space-between; font-size: 24rpx; color: #8E8E93; margin-bottom: 24rpx; border-bottom: 1rpx solid #F2F2F7; padding-bottom: 16rpx; }
-.req-user { display: flex; align-items: center; margin-bottom: 24rpx; }
-.u-avt { width: 88rpx; height: 88rpx; border-radius: 50%; background: #eee; margin-right: 24rpx; }
-.u-n { font-weight: 600; font-size: 32rpx; color: #1C1C1E; }
-.u-d { font-size: 26rpx; color: #8E8E93; margin-top: 4rpx;}
-.view-dtl { font-size: 24rpx; color: #007AFF; margin-left: auto; font-weight: 500;} /* iOS Blue */
-
-.req-actions { display: flex; gap: 24rpx; justify-content: flex-end; }
-.btn { margin: 0; font-size: 26rpx; font-weight: 600; border-radius: 36rpx; padding: 0 36rpx; height: 64rpx; line-height: 64rpx; }
+.req-head { display: flex; justify-content: space-between; font-size: 24rpx; color: #999; margin-bottom: 20rpx; border-bottom: 1rpx solid #f5f5f5; padding-bottom: 10rpx; }
+.req-user { display: flex; align-items: center; margin-bottom: 20rpx; }
+.u-avt { width: 80rpx; height: 80rpx; border-radius: 50%; background: #eee; margin-right: 20rpx; }
+.u-n { font-weight: bold; font-size: 30rpx; color:#333;}
+.u-d { font-size: 24rpx; color: #666; }
+.view-dtl { font-size: 24rpx; color: #576b95; margin-left: auto; }
+.req-actions { display: flex; gap: 20rpx; justify-content: flex-end; }
+.btn { margin: 0; font-size: 24rpx; }
 .agree { background: #1C1C1E; color: #fff; }
-.reject { background: #F2F2F7; color: #8E8E93; }
+.reject { background: #f5f5f5; color: #666; }
+.req-res { text-align: right; font-size: 26rpx; color: #999; font-weight: bold; }
+
+/* 空状态优化 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 150rpx;
+}
+.empty-icon { font-size: 100rpx; margin-bottom: 30rpx; opacity: 0.5; filter: grayscale(100%); }
+.empty-text { font-size: 30rpx; color: #333; font-weight: 600; margin-bottom: 10rpx; }
+.empty-sub { font-size: 24rpx; color: #999; }

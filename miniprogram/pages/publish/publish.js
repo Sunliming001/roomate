@@ -7,7 +7,8 @@ Page({
     initialData: {
       community: '', location: null, city: '',
       layout: { room: '', hall: 1, toilet: 1 },
-      rooms: [], desc: '', totalPrice: ''
+      rooms: [], desc: '', totalPrice: '',
+      pets: [] // 存储宠物策略: ['none'] 或 ['cat', 'dog']
     },
     formData: {},
     isMeOptions: ['是', '否'],
@@ -15,35 +16,31 @@ Page({
     ageOptions: Array.from({length: 43}, (_, i) => (i + 18) + '岁'), 
     expectGenderOptions: ['不限', '男', '女'],
     
+    // 宠物选项配置
+    petOpts: [
+        { key: 'none', name: '不接受' },
+        { key: 'cat', name: '接受猫' },
+        { key: 'dog', name: '接受狗' }
+    ],
+
     isEditMode: false,
     editId: null
   },
 
-  // TabBar 页面初次加载只执行一次 onLoad
   onLoad(options) {
-    this.resetForm();
-  },
-
-  // --- 核心修复：每次显示时检查是否有编辑任务 ---
-  onShow() {
-    if (app.globalData.editRoomId) {
-        const id = app.globalData.editRoomId;
-        // 消费掉这个全局变量，防止下次进来重复触发
-        app.globalData.editRoomId = null;
-        
-        this.setData({ isEditMode: true, editId: id });
+    if (options.id) {
+        this.setData({ isEditMode: true, editId: options.id });
         wx.setNavigationBarTitle({ title: '修改房源' });
-        this.loadRoomData(id);
+        this.loadRoomData(options.id);
+    } else {
+        this.resetForm();
     }
   },
 
   resetForm() {
     this.setData({ 
-      formData: JSON.parse(JSON.stringify(this.data.initialData)),
-      isEditMode: false,
-      editId: null
+      formData: JSON.parse(JSON.stringify(this.data.initialData)) 
     });
-    wx.setNavigationBarTitle({ title: '发布找舍友' });
   },
 
   loadRoomData(id) {
@@ -51,62 +48,66 @@ Page({
     db.collection('rooms').doc(id).get().then(res => {
         const d = res.data;
         if(!d.location) d.location = null;
+        if(!d.pets) d.pets = []; // 兼容旧数据
         this.setData({ formData: d });
         wx.hideLoading();
     }).catch(err => {
-        console.error(err);
         wx.hideLoading();
         wx.showToast({ title: '加载失败', icon: 'none' });
     });
   },
 
-  // 只需替换 chooseLocation 函数部分，其他保持不变
- // --- 核心修复：城市名称清洗逻辑 ---
- chooseLocation() {
-  const that = this;
-  wx.chooseLocation({
-    success(res) {
-      console.log('原始地址:', res.address);
-      let city = '南京市'; // 默认兜底
+  // --- 核心：宠物标签切换逻辑 ---
+  togglePet(e) {
+      const key = e.currentTarget.dataset.key;
+      let pets = this.data.formData.pets || [];
 
-      // 1. 初步提取
-      const cityMatch = res.address.match(/([^省]+市)/);
-      if (cityMatch && cityMatch[1]) {
-          city = cityMatch[1];
-      }
-
-      // 2. 【关键修复】针对直辖市强制修正
-      // 如果包含以下关键词，强制锁定为标准名称，解决 "上海市上海市" 问题
-      if (res.address.indexOf('上海') > -1 || city.indexOf('上海') > -1) {
-          city = '上海市';
-      } else if (res.address.indexOf('北京') > -1 || city.indexOf('北京') > -1) {
-          city = '北京市';
-      } else if (res.address.indexOf('天津') > -1 || city.indexOf('天津') > -1) {
-          city = '天津市';
-      } else if (res.address.indexOf('重庆') > -1 || city.indexOf('重庆') > -1) {
-          city = '重庆市';
+      if (key === 'none') {
+          // 如果点击“不接受”，则清空其他，只留none
+          pets = ['none'];
       } else {
-          // 3. 对于非直辖市，去掉可能残留的 "省" 字
-          // 例如 "江苏省南京市" -> "南京市"
-          if (city.indexOf('省') > -1) {
-              city = city.split('省')[1];
+          // 如果点击猫或狗
+          // 1. 先移除 'none'
+          const noneIdx = pets.indexOf('none');
+          if (noneIdx > -1) pets.splice(noneIdx, 1);
+
+          // 2. 切换当前项
+          const idx = pets.indexOf(key);
+          if (idx > -1) {
+              pets.splice(idx, 1);
+          } else {
+              pets.push(key);
           }
       }
+      this.setData({ 'formData.pets': pets });
+  },
 
-      console.log('清洗后城市:', city);
-
-      that.setData({ 
-        'formData.community': res.name,
-        'formData.address': res.address,
-        'formData.city': city, 
-        'formData.location': db.Geo.Point(res.longitude, res.latitude)
-      });
-    },
-    fail(err) {
-      if (err.errMsg.indexOf('auth') > -1) wx.openSetting();
-    }
-  });
-},
+  chooseLocation() {
+    const that = this;
+    wx.chooseLocation({
+      success(res) {
+        let city = '南京市'; 
+        const cityMatch = res.address.match(/([^省]+市)/);
+        if (cityMatch && cityMatch[1]) {
+            city = cityMatch[1];
+            if (city.length > 10) city = city.substring(city.length - 3); 
+            if (city.indexOf('省') > -1) city = city.split('省')[1];
+        } else {
+            const directCity = res.address.match(/^(.+?市)/);
+            if(directCity) city = directCity[1];
+        }
+        that.setData({ 
+          'formData.community': res.name,
+          'formData.address': res.address,
+          'formData.city': city, 
+          'formData.location': db.Geo.Point(res.longitude, res.latitude)
+        });
+      },
+      fail(err) {
+        if (err.errMsg.indexOf('auth') > -1) wx.openSetting();
+      }
+    });
+  },
 
   onRoomCountInput(e) {
     let count = parseInt(e.detail.value);
@@ -183,6 +184,8 @@ Page({
     if(!d.community || !d.location) return '请选择小区位置';
     if(!d.layout.room) return '请填写房间数量';
     if(!d.totalPrice) return '请填写总租金';
+    // 宠物必填校验（可选）
+    if(!d.pets || d.pets.length === 0) return '请选择养宠要求';
 
     let roomSum = 0;
     for(let i=0; i<d.rooms.length; i++) {
@@ -254,9 +257,7 @@ Page({
   finishSubmit(msg) {
     wx.hideLoading();
     wx.showToast({title: msg, icon: 'success'});
-    
-    this.resetForm();
-    
+    if(!this.data.isEditMode) this.resetForm();
     setTimeout(() => {
       wx.switchTab({ 
         url: '/pages/index/index',

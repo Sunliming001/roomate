@@ -1,8 +1,18 @@
 <view class="container">
-  <!-- 导航返回 -->
-  <view class="back-btn" style="top:{{statusBarHeight+8}}px" bindtap="goBack">←</view>
+  <!-- 1. 自定义顶部导航栏 -->
+  <view class="custom-header" style="padding-top:{{statusBarHeight}}px">
+    <view class="header-row">
+      <view class="back-btn-q" bindtap="goBack">
+        <view class="arrow-icon"></view>
+      </view>
+      <view class="header-title">房源详情</view>
+    </view>
+  </view>
 
-  <!-- 顶部相册 -->
+  <!-- 2. 占位块 -->
+  <view style="height: {{statusBarHeight + 44}}px; width: 100%; background: #fff;"></view>
+
+  <!-- 3. 顶部相册 -->
   <swiper class="swiper" indicator-dots circular>
     <block wx:for="{{gallery}}" wx:key="index">
       <swiper-item bindtap="previewImg" data-url="{{item.url}}">
@@ -17,6 +27,10 @@
     <view class="card title-card">
       <view class="h1">{{info.community}} {{info.layout.room}}室</view>
       <view class="price">¥{{info.minPrice}}<text class="sub">起/月</text></view>
+      <!-- 新增：宠物信息展示 -->
+      <view class="pet-row">
+        <text class="pet-tag">{{info.petDisplay}}</text>
+      </view>
     </view>
 
     <!-- 房间分配情况 -->
@@ -67,24 +81,20 @@
       <text class="icon" style="color: {{isFav ? '#FFD700' : '#666'}}">{{isFav ? '★' : '☆'}}</text>
       <text class="txt">{{isFav ? '已收藏' : '收藏'}}</text>
     </view>
-    
     <view class="icon-btn" bindtap="openShareModal">
       <text class="icon">↗</text>
       <text class="txt">分享</text>
     </view>
-    
     <view class="chat-btn" bindtap="handleChat">
       <text>💬 聊一聊</text>
     </view>
-
     <button class="join-btn" bindtap="openJoinModal" disabled="{{info.status==='completed'}}">
       {{info.status==='completed' ? '已满员' : '我想加入'}}
     </button>
   </view>
 
-  <!-- 加入选择弹窗 -->
+  <!-- 加入弹窗 -->
   <view class="modal-mask" wx:if="{{showJoinModal}}" bindtap="closeJoinModal">
-    <!-- catchtap="preventBubble" 阻止点击内容关闭弹窗 -->
     <view class="modal-content" catchtap="preventBubble">
       <view class="m-title">选择要加入的房间</view>
       <view class="m-list">
@@ -99,7 +109,7 @@
     </view>
   </view>
 
-  <!-- 分享选择弹窗 -->
+  <!-- 分享弹窗 -->
   <view class="share-mask" wx:if="{{showShareModal}}" bindtap="closeShareModal">
     <view class="share-panel" catchtap="preventBubble">
       <view class="share-title">分享到</view>
@@ -132,5 +142,4 @@
       <view class="share-cancel" bindtap="closeShareModal">取消</view>
     </view>
   </view>
-
 </view>
