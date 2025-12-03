@@ -20,13 +20,11 @@ Page({
 
   onLoad(opts) {
     this.roomId = opts.id;
-    
     const user = wx.getStorageSync('my_user_info');
     if (!user) {
         wx.redirectTo({ url: `/pages/login/login?redirectId=${this.roomId}` });
         return;
     }
-    
     this.loadRoomDetail();
   },
 
@@ -56,7 +54,6 @@ Page({
   },
 
   processData(d) {
-    // 1. 相册处理
     const gallery = [];
     if (d.rooms) {
       d.rooms.forEach(r => {
@@ -65,7 +62,6 @@ Page({
     }
     if(gallery.length==0) gallery.push({ url: '/images/default-room.png', name: '暂无照片' });
 
-    // 2. 宠物信息处理 (新增逻辑)
     let petText = '';
     const pets = d.pets || [];
     if (pets.includes('none')) {
@@ -75,28 +71,39 @@ Page({
         const labels = pets.filter(k => k !== 'none').map(k => map[k] || k);
         petText = labels.join('  ');
     } else {
-        petText = '⭕ 宠物要求不限'; // 默认情况
+        petText = '⭕ 宠物要求不限';
     }
     d.petDisplay = petText;
 
-    // 3. 格式化入住信息
+    // --- 1. 处理入住者信息 ---
     d.rooms.forEach(r => {
       if(r.status==1) {
          if(r.isMeIndex==0) { 
             r.occupantDisplay = {
                gender: d.publisher.gender == 2 ? 1 : 0, 
-               age: '房主',
+               age: d.publisher.ageIndex != null ? (d.publisher.ageIndex + 18) + '岁' : '未知',
                job: d.publisher.job || '未知'
             };
          } else { 
             r.occupantDisplay = {
                gender: r.occupant.genderIndex, 
-               age: ['00后','95后','90后','80后','其他'][r.occupant.ageIndex] || '未知',
+               age: ['00后','95后','90后','80后','其他'].includes(r.occupant.ageIndex) 
+                    ? r.occupant.ageIndex // 兼容旧数据字符串
+                    : (r.occupant.ageIndex != null ? (parseInt(r.occupant.ageIndex) + 18) + '岁' : '未知'),
                job: r.occupant.job || '保密'
             };
          }
       }
     });
+
+    // --- 2. 处理房主详细信息 (性别、年龄、职业、标签) ---
+    d.publisherDisplay = {
+        genderStr: ['未知', '男', '女'][d.publisher.gender],
+        ageStr: d.publisher.ageIndex != null ? (d.publisher.ageIndex + 18) + '岁' : '未知',
+        job: d.publisher.job || '未知',
+        tags: d.publisher.tagList || []
+    };
+
     this.setData({ info: d, gallery });
   },
   
@@ -116,7 +123,6 @@ Page({
   },
 
   handleFav() {
-    if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
     const me = this.data.userInfo;
     const newFavStatus = !this.data.isFav;
     this.setData({ isFav: newFavStatus });
@@ -144,12 +150,9 @@ Page({
   },
 
   handleChat() {
-    if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
-    
     const me = this.data.userInfo;
     const owner = this.data.info.publisher;
     const roommates = this.data.info.memberIds || [];
-
     if(me._id === owner._id) return wx.switchTab({ url: '/pages/message/message' });
 
     wx.showLoading({ title: '进入会话...' });
@@ -190,7 +193,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: `【友邻找室友】${this.data.info.community} 招室友啦！`,
+      title: `【友邻】${this.data.info.community} 招室友！`,
       path: `/pages/detail/detail?id=${this.roomId}`,
       imageUrl: this.data.info.cover
     }
@@ -215,7 +218,6 @@ Page({
   },
 
   openJoinModal() {
-    if (!this.data.userInfo) return wx.navigateTo({ url: '/pages/login/login' });
     if (this.data.info.publisher._id === this.data.userInfo._id) return wx.showToast({title: '不能加入自己的房源', icon: 'none'});
     this.setData({ showJoinModal: true });
   },

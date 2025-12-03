@@ -15,7 +15,9 @@
     <block wx:for="{{chatList}}" wx:key="_id">
       <view class="chat-item" bindtap="goChat" data-id="{{item._id}}" data-name="{{item.roomName}}">
         <view class="avatar-box">
-           <image class="avatar" src="{{item.targetAvatar}}"></image>
+           <view class="group-avatar">
+             <image wx:for="{{item.memberAvatars}}" wx:for-item="url" wx:key="*this" src="{{url}}" class="g-avt"></image>
+           </view>
            <view class="red-badge" wx:if="{{item.hasUnread}}"></view>
         </view>
         <view class="content">
@@ -29,12 +31,16 @@
         </view>
       </view>
     </block>
-    <!-- 美化后的空状态 -->
+
+    <!-- 空状态 -->
     <view wx:if="{{chatList.length==0}}" class="empty-container">
-      <image class="empty-img" src="/images/empty_chat.png" wx:if="{{false}}"></image> <!-- 只有你有图时才开 -->
-      <view class="empty-icon">💬</view>
-      <view class="empty-text">暂时没有聊天消息</view>
-      <view class="empty-sub">去首页找个喜欢的房源聊聊吧</view>
+      <view class="empty-visual chat-bg">
+        <text class="empty-emoji">💭</text>
+        <view class="bubble-dec"></view>
+      </view>
+      <view class="empty-title">还没有消息呢</view>
+      <view class="empty-desc">快去首页找个心仪的室友聊聊吧~</view>
+      <view class="empty-btn" bindtap="goHome">去逛逛</view>
     </view>
   </view>
 
@@ -55,7 +61,10 @@
 
       <view class="notif-card req" wx:if="{{item.type === 'join_req'}}">
         <view class="req-head">
-           <text class="rh-t">申请加入 <text class="mini-dot" wx:if="{{!item.isRead}}"></text></text>
+           <view class="rh-box">
+             <text class="rh-t">申请加入</text>
+             <view class="mini-dot" wx:if="{{!item.isRead}}"></view>
+           </view>
            <text class="rh-time">{{item.timeStr}}</text>
         </view>
         <view class="req-user" bindtap="viewApplicant" data-user="{{item.sender}}">
@@ -75,10 +84,14 @@
         </view>
       </view>
     </block>
-    <!-- 美化后的空状态 -->
+
+    <!-- 通知空状态 -->
     <view wx:if="{{notifList.length==0}}" class="empty-container">
-      <view class="empty-icon">🔔</view>
-      <view class="empty-text">暂时没有新通知</view>
+      <view class="empty-visual notif-bg">
+        <text class="empty-emoji">🔕</text>
+      </view>
+      <view class="empty-title">这里静悄悄的</view>
+      <view class="empty-desc">暂时没有收到新的通知哦</view>
     </view>
   </view>
 </view>

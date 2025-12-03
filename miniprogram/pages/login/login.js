@@ -3,7 +3,7 @@ const db = wx.cloud.database();
 
 Page({
   data: {
-    userInfo: { gender: 1 },
+    userInfo: { gender: 1, ageIndex: null },
     tags: {},
     tagOptions: [
       '作息规律', '爱干净', '不抽烟', '宠物友好', 
@@ -12,35 +12,23 @@ Page({
       '二次元', '游戏开黑', '健身达人', '追剧',
       '音乐', '摄影', '旅行', '极简主义'
     ],
+    ageOptions: Array.from({length: 43}, (_, i) => (i + 18) + '岁'),
     extraTags: [],
-    inputTagVal: '',
-    // 新增：用于存储这就跳转的目标ID
-    redirectId: null 
-  },
-
-  // --- 核心修复：接收重定向参数 ---
-  onLoad(options) {
-    if (options.redirectId) {
-        console.log('检测到重定向需求，目标房间ID:', options.redirectId);
-        this.setData({ redirectId: options.redirectId });
-    }
+    inputTagVal: ''
   },
 
   onChooseAvatar(e) { this.setData({ 'userInfo.avatarUrl': e.detail.avatarUrl }) },
   onNickNameChange(e) { this.setData({ 'userInfo.nickName': e.detail.value }) },
-  bindInput(e) { this.setData({ [`userInfo.${e.currentTarget.dataset.key}`]: e.detail.value }) },
+  bindInput(e) { this.setData({ 'userInfo.job': e.detail.value }) },
   setGender(e) { this.setData({ 'userInfo.gender': e.currentTarget.dataset.v }) },
-  
+  onAgeChange(e) { this.setData({ 'userInfo.ageIndex': parseInt(e.detail.value) }); },
+
   toggleTag(e) {
     const t = e.currentTarget.dataset.tag;
     const tags = this.data.tags;
-    
-    if (tags[t]) {
-      delete tags[t];
-    } else {
-       if (Object.keys(tags).length >= 4) {
-         return wx.showToast({ title: '最多选4个', icon: 'none' });
-       }
+    if (tags[t]) delete tags[t];
+    else {
+       if (Object.keys(tags).length >= 4) return wx.showToast({ title: '最多选4个', icon: 'none' });
        tags[t] = true;
     }
     this.setData({ tags });
@@ -51,12 +39,11 @@ Page({
   addCustomTag() {
     const val = this.data.inputTagVal.trim();
     if (!val) return;
+    // 长度校验放在这里
     if (val.length > 6) return wx.showToast({ title: '标签太长', icon: 'none' });
     
     const tags = this.data.tags;
-    if (!tags[val] && Object.keys(tags).length >= 4) {
-        return wx.showToast({ title: '最多选4个', icon: 'none' });
-    }
+    if (!tags[val] && Object.keys(tags).length >= 4) return wx.showToast({ title: '最多选4个', icon: 'none' });
     
     tags[val] = true; 
     if (!this.data.tagOptions.includes(val) && !this.data.extraTags.includes(val)) {
@@ -69,7 +56,10 @@ Page({
   
   submit() {
     const u = this.data.userInfo;
-    if(!u.avatarUrl || !u.nickName) return wx.showToast({title:'请完善头像昵称', icon:'none'});
+    if(!u.avatarUrl) return wx.showToast({title:'请上传头像', icon:'none'});
+    if(!u.nickName) return wx.showToast({title:'请填写昵称', icon:'none'});
+    if(!u.job) return wx.showToast({title:'请填写职业', icon:'none'});
+    if(u.ageIndex === null || u.ageIndex === undefined) return wx.showToast({title:'请选择年龄', icon:'none'});
     
     const selectedTags = Object.keys(this.data.tags);
     if (selectedTags.length === 0) return wx.showToast({title:'请至少选1个标签', icon:'none'});
@@ -84,20 +74,17 @@ Page({
 
     this.uploadAvatar(u.avatarUrl).then(cloudAvatarUrl => {
         finalData.avatarUrl = cloudAvatarUrl;
-        
-        // 直接创建新用户
         db.collection('users').add({
             data: finalData
         }).then(res => {
             this.finishLogin({ ...finalData, _id: res._id });
         }).catch(err => {
-            console.error('注册失败', err);
+            console.error(err);
             wx.hideLoading();
             wx.showToast({title: '注册失败', icon: 'none'});
         });
-
     }).catch(err => {
-        console.error('头像上传失败', err);
+        console.error(err);
         wx.hideLoading();
         wx.showToast({title: '图片上传失败', icon: 'none'});
     });
@@ -114,7 +101,6 @@ Page({
       });
   },
 
-  // --- 核心修复：登录完成后的跳转逻辑 ---
   finishLogin(userData) {
       wx.setStorageSync('my_user_info', userData);
       if (app.loginSuccess) {
@@ -122,18 +108,7 @@ Page({
       } else {
           app.globalData.userInfo = userData;
       }
-      
       wx.hideLoading();
-
-      // 判断去向
-      if (this.data.redirectId) {
-          // 如果有重定向ID，说明是点分享进来的，跳回详情页
-          wx.redirectTo({
-              url: `/pages/detail/detail?id=${this.data.redirectId}`
-          });
-      } else {
-          // 正常登录，去首页
-          wx.reLaunch({ url: '/pages/index/index' });
-      }
+      wx.reLaunch({ url: '/pages/index/index' });
   }
 })

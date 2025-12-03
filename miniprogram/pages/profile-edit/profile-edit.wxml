@@ -12,7 +12,7 @@
     
     <view class="cell-row">
       <text class="cell-lbl">昵称</text>
-      <input class="cell-inp" type="nickname" value="{{userInfo.nickName}}" bindchange="onNickNameChange" placeholder="请输入"/>
+      <input class="cell-inp" type="nickname" value="{{userInfo.nickName}}" bindchange="onNickNameChange" placeholder="必填"/>
     </view>
 
     <picker range="{{['未知','男','女']}}" value="{{userInfo.gender}}" bindchange="onGenderChange">
@@ -24,31 +24,40 @@
         </view>
       </view>
     </picker>
+    
+    <picker range="{{ageOptions}}" value="{{userInfo.ageIndex}}" bindchange="onAgeChange">
+      <view class="cell-row">
+        <text class="cell-lbl">年龄</text>
+        <view class="cell-val">
+          <text>{{userInfo.ageIndex != null ? ageOptions[userInfo.ageIndex] : '请选择'}}</text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+    </picker>
 
     <view class="cell-row last">
       <text class="cell-lbl">职业</text>
-      <input class="cell-inp" value="{{userInfo.job}}" bindinput="bindInput" data-key="job" placeholder="请填写职业"/>
+      <input class="cell-inp" value="{{userInfo.job}}" bindinput="bindInput" data-key="job" placeholder="必填"/>
     </view>
   </view>
 
   <view class="section-header">
     <text>个人标签</text>
-    <text class="sub">点击选择或添加自定义</text>
+    <text class="sub">点击选择或添加自定义 (最多4个)</text>
   </view>
   
   <view class="tags-wrap">
-    <!-- 预设 -->
     <block wx:for="{{tagOptions}}" wx:key="*this">
       <view class="tag-pill {{tags[item] ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
     </block>
-    <!-- 自定义 -->
     <block wx:for="{{extraTags}}" wx:key="*this">
       <view class="tag-pill {{tags[item] ? 'active' : ''}}" bindtap="toggleTag" data-tag="{{item}}">{{item}}</view>
     </block>
   </view>
 
   <view class="custom-input-box">
-     <input class="c-in" placeholder="添加自定义标签" value="{{inputTagVal}}" bindinput="onTagInput" maxlength="6"/>
+     <!-- 移除 maxlength -->
+     <input class="c-in" placeholder="添加自定义标签" value="{{inputTagVal}}" bindinput="onTagInput"/>
      <view class="c-btn" bindtap="addCustomTag">+</view>
   </view>
 

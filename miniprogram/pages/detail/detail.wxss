@@ -138,3 +138,15 @@ page { background: #F2F2F7; }
 .s-icon.link { background: #666; }
 .share-item text { font-size: 24rpx; color: #666; }
 .share-cancel { margin-top: 20rpx; background: #F9F9F9; text-align: center; padding: 24rpx; font-size: 30rpx; border-radius: 16rpx; font-weight: 600;}
+/* ... 其他样式保持不变，请保留头部、相册、底部等样式 ... */
+/* 仅列出新增/修改部分 */
+
+.pub-card { display: flex; align-items: flex-start; padding-bottom: 40rpx; }
+.p-avt { width: 96rpx; height: 96rpx; border-radius: 50%; margin-right: 24rpx; background: #eee; flex-shrink: 0; }
+.p-txt { flex: 1; }
+.p-row-1 { display: flex; align-items: center; margin-bottom: 8rpx; }
+.pn { font-weight: bold; font-size: 32rpx; margin-right: 12rpx; color: #1C1C1E; }
+.pt { font-size: 20rpx; background: #1C1C1E; color: #fff; padding: 2rpx 10rpx; border-radius: 6rpx; }
+.p-row-2 { font-size: 24rpx; color: #666; margin-bottom: 16rpx; }
+.p-tags { display: flex; flex-wrap: wrap; gap: 10rpx; }
+.p-tag { font-size: 20rpx; background: #F5F5F7; color: #888; padding: 4rpx 12rpx; border-radius: 8rpx; }

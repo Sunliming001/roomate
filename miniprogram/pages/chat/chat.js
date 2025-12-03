@@ -13,7 +13,12 @@ Page({
     chatInfo: null,
     memberMap: {},
     inputBottom: 0,
-    showMore: false // 控制功能面板
+    showMore: false,
+    headerAvatars: [], // 头部头像列表
+    
+    showContactModal: false,
+    contactType: '微信号',
+    contactValue: ''
   },
 
   onLoad(opts) {
@@ -22,31 +27,22 @@ Page({
     this.initChat();
   },
 
+  // --- UI 交互 ---
   onFocus(e) {
-    this.setData({ 
-      inputBottom: e.detail.height,
-      showMore: false, // 键盘弹起时关闭面板
-      scrollId: 'bottom-pad' 
-    });
+    this.setData({ inputBottom: e.detail.height, showMore: false, scrollId: 'bottom-pad' });
   },
   onBlur(e) { this.setData({ inputBottom: 0 }); },
-
   toggleMore() {
-      this.setData({ 
-          showMore: !this.data.showMore,
-          inputBottom: 0, // 关闭键盘
-          scrollId: 'bottom-pad'
-      });
+      this.setData({ showMore: !this.data.showMore, inputBottom: 0, scrollId: 'bottom-pad' });
       if(!this.data.showMore) wx.hideKeyboard();
   },
-  closeMore() {
-      if(this.data.showMore) this.setData({ showMore: false });
-  },
+  closeMore() { if(this.data.showMore) this.setData({ showMore: false }); },
 
   initChat() {
     db.collection('chats').doc(this.data.chatId).get().then(res => {
       this.setData({ chatInfo: res.data });
       this.fetchMemberInfo(res.data.members);
+
       if (res.data.unreadMembers && res.data.unreadMembers.includes(this.userInfo._id)) {
         db.collection('chats').doc(this.data.chatId).update({
           data: { unreadMembers: _.pull(this.userInfo._id) }
@@ -58,8 +54,13 @@ Page({
   fetchMemberInfo(memberIds) {
     db.collection('users').where({ _id: _.in(memberIds) }).get().then(res => {
       const map = {};
-      res.data.forEach(u => { map[u._id] = u; });
-      this.setData({ memberMap: map });
+      const avatars = [];
+      res.data.forEach(u => { 
+          map[u._id] = u; 
+          // 收集前5个头像用于头部
+          if(avatars.length < 5) avatars.push(u.avatarUrl);
+      });
+      this.setData({ memberMap: map, headerAvatars: avatars });
       this.watchMessages();
     }).catch(err => {
       this.watchMessages(); 
@@ -79,7 +80,6 @@ Page({
           const msgs = snapshot.docs;
           const myId = that.userInfo._id;
           const idsToMarkRead = []; 
-          
           let lastTime = 0;
 
           const formattedMsgs = msgs.map(msg => {
@@ -87,6 +87,16 @@ Page({
             const readBy = msg.readBy || []; 
             if (!isMe && !readBy.includes(myId)) idsToMarkRead.push(msg._id);
 
+            // 获取昵称和头像
+            let avatar = msg.avatar;
+            let nickName = '用户';
+            if (that.data.memberMap[msg.senderId]) {
+                const u = that.data.memberMap[msg.senderId];
+                avatar = u.avatarUrl;
+                nickName = u.nickName;
+            }
+
+            // 已读状态
             let readStatusText = '';
             if (isMe) {
                const readerIds = readBy.filter(uid => uid !== myId);
@@ -97,23 +107,18 @@ Page({
                    readStatusText = '未读';
                }
             }
-
-            let avatar = msg.avatar;
-            if (that.data.memberMap[msg.senderId]) avatar = that.data.memberMap[msg.senderId].avatarUrl;
             
-            // --- 时间显示逻辑 ---
+            // 时间
             const msgDate = msg.createTime instanceof Date ? msg.createTime : new Date(msg.createTime);
             let timeStr = '';
-            // 如果距离上一条超过 5 分钟，显示时间
             if (msgDate.getTime() - lastTime > 5 * 60 * 1000) {
                 timeStr = that.formatMsgTime(msgDate);
                 lastTime = msgDate.getTime();
             }
 
             return {
-              ...msg, isMe, avatar: avatar || '/images/default-room.png',
-              readStatusText,
-              timeStr, showTime: !!timeStr
+              ...msg, isMe, avatar: avatar || '/images/default-room.png', nickName,
+              readStatusText, timeStr, showTime: !!timeStr
             };
           });
 
@@ -124,7 +129,6 @@ Page({
       });
   },
 
-  // 时间格式化辅助函数
   formatMsgTime(date) {
       const now = new Date();
       const isToday = date.getDate() === now.getDate() && date.getMonth() === now.getMonth();
@@ -141,41 +145,51 @@ Page({
   },
 
   onInput(e) { this.setData({ inputVal: e.detail.value }) },
-
-  // 发送文本
   send() { this.doSend(this.data.inputVal, 'text'); },
 
-  // 发送图片
   sendImage() {
-      wx.chooseMedia({
-          count: 1, mediaType: ['image'],
-          success: res => {
-              const path = res.tempFiles[0].tempFilePath;
-              wx.showLoading({title:'发送中'});
-              const cloudPath = 'chat-img/' + Date.now() + Math.floor(Math.random()*1000) + '.png';
-              wx.cloud.uploadFile({
-                  cloudPath, filePath: path,
-                  success: upRes => {
-                      wx.hideLoading();
-                      this.doSend(upRes.fileID, 'image');
-                  },
-                  fail: () => wx.hideLoading()
-              });
-          }
-      });
+      wx.chooseMedia({ count: 1, mediaType: ['image'], success: res => {
+          const path = res.tempFiles[0].tempFilePath;
+          wx.showLoading({title:'发送中'});
+          const cloudPath = 'chat-img/' + Date.now() + Math.floor(Math.random()*1000) + '.png';
+          wx.cloud.uploadFile({
+              cloudPath, filePath: path,
+              success: upRes => { wx.hideLoading(); this.doSend(upRes.fileID, 'image'); },
+              fail: () => wx.hideLoading()
+          });
+      }});
   },
 
-  // 发送位置
   sendLocation() {
-      wx.chooseLocation({
-          success: res => {
-              const locData = { name: res.name, address: res.address, latitude: res.latitude, longitude: res.longitude };
-              this.doSend(locData, 'location');
-          }
-      });
+      wx.chooseLocation({ success: res => {
+          const locData = { name: res.name, address: res.address, latitude: res.latitude, longitude: res.longitude };
+          this.doSend(locData, 'location');
+      }});
   },
 
-  // 统一发送逻辑
+  sendContactReq() {
+      this.doSend('我想和您交换联系方式，方便进一步沟通吗？', 'contact_req');
+      this.setData({ showMore: false }); 
+  },
+
+  handleAcceptContact() { this.setData({ showContactModal: true }); },
+
+  switchContactType() {
+      const types = ['微信号', '手机号'];
+      wx.showActionSheet({ itemList: types, success: (res) => { this.setData({ contactType: types[res.tapIndex] }); } });
+  },
+
+  onContactInput(e) { this.setData({ contactValue: e.detail.value }); },
+
+  submitContact() {
+      if (!this.data.contactValue) return wx.showToast({title:'请填写内容', icon:'none'});
+      const info = { type: this.data.contactType, value: this.data.contactValue };
+      this.doSend(info, 'contact_info');
+      this.setData({ showContactModal: false, contactValue: '' });
+  },
+
+  closeContactModal() { this.setData({ showContactModal: false }); },
+
   doSend(content, type) {
     if (!content && type=='text') return;
     
@@ -186,44 +200,46 @@ Page({
     }
 
     const msg = {
-      chatId: this.data.chatId, 
-      content: content,
-      msgType: type, // 增加消息类型
-      senderId: me._id, 
-      avatar: me.avatarUrl,
-      createTime: db.serverDate(),
-      readBy: [] 
+      chatId: this.data.chatId, content: content, msgType: type, 
+      senderId: me._id, avatar: me.avatarUrl, createTime: db.serverDate(), readBy: [] 
     };
 
-    // 乐观更新
-    const tempMsg = { ...msg, isMe: true, readStatusText: '...', _id: 'temp_'+Date.now(), createTime: new Date() };
+    const tempMsg = { ...msg, isMe: true, readStatusText: '...', _id: 'temp_'+Date.now(), createTime: new Date(), nickName: me.nickName };
     this.setData({ messages: [...this.data.messages, tempMsg], inputVal: '', scrollId: 'bottom-pad', showMore: false });
 
     db.collection('messages').add({ data: msg });
 
-    // 更新会话摘要
     let lastText = content;
     if (type == 'image') lastText = '[图片]';
     if (type == 'location') lastText = '[位置]';
+    if (type == 'contact_req') lastText = '[联系方式申请]';
+    if (type == 'contact_info') lastText = '[联系方式名片]';
 
     db.collection('chats').doc(this.data.chatId).update({
-      data: {
-        lastMessage: lastText,
-        updateTime: db.serverDate(),
-        unreadMembers: unreadTargets 
-      }
+      data: { lastMessage: lastText, updateTime: db.serverDate(), unreadMembers: unreadTargets }
     });
   },
   
-  // 查看大图
-  previewImage(e) {
-      wx.previewImage({ urls: [e.currentTarget.dataset.src] });
-  },
+  previewImage(e) { wx.previewImage({ urls: [e.currentTarget.dataset.src] }); },
 
-  // 打开地图
   openLocation(e) {
       const loc = e.currentTarget.dataset.loc;
-      wx.openLocation({ latitude: loc.latitude, longitude: loc.longitude, name: loc.name, address: loc.address });
+      wx.openLocation({ latitude: parseFloat(loc.latitude), longitude: parseFloat(loc.longitude), name: loc.name, address: loc.address });
+  },
+
+  viewProfile(e) {
+      const uid = e.currentTarget.dataset.uid;
+      const user = this.data.memberMap[uid];
+      if (user) {
+          const tags = user.tagList ? user.tagList.join('、') : '无';
+          const gender = ['未知','男','女'][user.gender];
+          const age = user.ageIndex != null ? (user.ageIndex + 18) + '岁' : '未知';
+          wx.showModal({
+              title: user.nickName,
+              content: `性别: ${gender}\n年龄: ${age}\n职业: ${user.job || '未填写'}\n标签: ${tags}`,
+              showCancel: false, confirmText: '知道了'
+          });
+      }
   },
 
   goBack() { wx.navigateBack(); },

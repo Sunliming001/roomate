@@ -1,7 +1,8 @@
 <view class="container">
   <!-- 顶部导航 -->
+  <!-- 核心修复：row 增加 padding-right，避开胶囊按钮 -->
   <view class="header" style="padding-top:{{statusBarHeight}}px">
-    <view class="row">
+    <view class="row" style="padding-right: {{headerPaddingRight}}px">
        <picker mode="region" level="city" bindchange="onCityChange">
          <view class="city-picker">
            <text>{{currentCity}}</text>
@@ -11,12 +12,13 @@
        <view class="search-box" bindtap="onSearchTap">
          <icon type="search" size="14"></icon>
          <input class="search-input" placeholder="点击搜索小区位置" value="{{searchKeyword}}" disabled="true" />
+         <!-- 确保这个 view 的 z-index 够高 -->
          <view wx:if="{{searchKeyword}}" catchtap="clearSearch" class="clear-icon">×</view>
        </view>
     </view>
   </view>
 
-  <!-- 筛选栏 (两行布局，防止拥挤) -->
+  <!-- 筛选栏 -->
   <view class="filters" style="top:{{statusBarHeight+44}}px">
     <!-- 1. 排序 -->
     <picker range="{{['最新发布','收藏最多']}}" bindchange="onSortChange">
@@ -37,10 +39,10 @@
         {{ (priceMin > 0 || priceMax < 10000) ? (priceMin + '-' + priceMax) : '租金' }} ▾
     </view>
 
-    <!-- 4. 宠物 (新增) -->
+    <!-- 4. 宠物 -->
     <picker range="{{['不限','不接受养宠','接受养猫','接受养狗']}}" bindchange="onPetChange">
-       <view class="tag {{filter.pet!=='不限' ? 'act' : ''}}">
-         {{filter.pet === '不限' ? '宠物要求' : filter.pet}} ▾
+       <view class="tag {{filter.pet && filter.pet!=='不限' ? 'act' : ''}}">
+         {{(!filter.pet || filter.pet === '不限') ? '宠物要求' : filter.pet}} ▾
        </view>
     </picker>
     
@@ -48,7 +50,7 @@
     <view class="tag {{filter.ensuite?'act':''}}" bindtap="toggleEnsuite">独卫</view>
   </view>
 
-  <!-- 租金滑块 (保持不变) -->
+  <!-- 租金滑块弹层 -->
   <view class="slider-box" wx:if="{{showPriceSlider}}">
      <view class="slider-title">
         租金范围 (¥{{priceMin}} - ¥{{priceMax}})
@@ -71,7 +73,6 @@
   </view>
   <view class="mask" wx:if="{{showPriceSlider}}" bindtap="togglePriceSlider"></view>
 
-  <!-- 占位高度需要增加，因为筛选栏可能变高了 -->
   <view style="height:{{statusBarHeight+44+50}}px"></view>
 
   <!-- 列表 -->

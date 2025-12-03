@@ -5,19 +5,36 @@ const _ = db.command;
 Page({
   data: {
     statusBarHeight: app.globalData.statusBarHeight || 20,
-    leftList: [], rightList: [],
-    currentCity: '南京市', userLoc: null, searchKeyword: '',
+    // 新增：顶部导航栏右侧留白宽度
+    headerPaddingRight: 0, 
     
-    // 筛选状态新增 pet
-    filter: { gender: 0, priceIdx: 0, ensuite: false, pet: '不限' },
-    // 排序: 'new' (最新) | 'hot' (收藏最多)
-    sortType: 'new', 
-
-    showPriceSlider: false, priceMin: 0, priceMax: 10000,
-    leftPercent: 0, rightPercent: 100, widthPercent: 100, sliderWidth: 0,
-
+    leftList: [], 
+    rightList: [],
+    currentCity: '南京市', 
+    userLoc: null,
+    searchKeyword: '',
+    filter: { gender: 0, priceIdx: 0, ensuite: false },
+    
     // 分页
-    page: 0, pageSize: 10, isOver: false, isLoading: false
+    page: 0, pageSize: 10, isOver: false, isLoading: false,
+
+    // 滑块
+    showPriceSlider: false, priceMin: 0, priceMax: 10000,
+    leftPercent: 0, rightPercent: 100, widthPercent: 100, sliderWidth: 0
+  },
+
+  // --- 核心修复：计算胶囊位置，防止遮挡 ---
+  onLoad() {
+    try {
+      const menu = wx.getMenuButtonBoundingClientRect();
+      const system = wx.getSystemInfoSync();
+      // 计算右侧留白：屏幕宽度 - 胶囊左边距 + 一点额外间隙(10px)
+      const rightSpace = system.windowWidth - menu.left + 10;
+      this.setData({ headerPaddingRight: rightSpace });
+    } catch (e) {
+      // 兜底：如果获取失败，给一个大概的值 (90px)
+      this.setData({ headerPaddingRight: 90 });
+    }
   },
 
   onShow() {
@@ -26,10 +43,13 @@ Page({
       setTimeout(() => {
         const pages = getCurrentPages();
         const curPage = pages[pages.length - 1];
-        if (curPage && curPage.route === 'pages/index/index') wx.reLaunch({ url: '/pages/login/login' });
+        if (curPage && curPage.route === 'pages/index/index') {
+           wx.reLaunch({ url: '/pages/login/login' });
+        }
       }, 500);
       return;
     }
+
     app.pollBadgeStatus();
 
     if (app.globalData.selectedCity) {
@@ -40,24 +60,19 @@ Page({
     else if (!this.data.userLoc) {
       this.getUserLocation();
     } else {
-      this.reload(); // 切回首页刷新
+      this.loadData();
     }
   },
 
-  // --- 新增：排序切换 ---
-  onSortChange(e) {
-      const idx = parseInt(e.detail.value);
-      const types = ['new', 'hot'];
-      this.setData({ sortType: types[idx] });
-      this.reload();
+  onPullDownRefresh() {
+    app.pollBadgeStatus();
+    this.reload(() => wx.stopPullDownRefresh());
   },
 
-  // --- 新增：宠物筛选切换 ---
-  onPetChange(e) {
-      const idx = parseInt(e.detail.value);
-      const pets = ['不限', '不接受养宠', '接受养猫', '接受养狗'];
-      this.setData({ 'filter.pet': pets[idx] });
-      this.reload();
+  onReachBottom() {
+    if (this.data.isOver || this.data.isLoading) return;
+    this.setData({ page: this.data.page + 1 });
+    this.loadData(true);
   },
 
   reload(cb) {
@@ -65,15 +80,18 @@ Page({
     this.loadData(false, cb);
   },
 
-  // ... getUserLocation, autoUpdateCity, onCityChange 等保持不变 ...
   getUserLocation() {
     const that = this;
     wx.getLocation({
       type: 'gcj02',
-      success(res) { that.setData({ userLoc: res }); that.autoUpdateCity(res); },
+      success(res) { 
+        that.setData({ userLoc: res });
+        that.autoUpdateCity(res);
+      },
       fail() { that.reload(); }
     });
   },
+
   autoUpdateCity(loc) {
     db.collection('rooms').limit(20).get({
       success: res => {
@@ -94,6 +112,7 @@ Page({
       fail: () => { this.loadData(); }
     });
   },
+
   onCityChange(e) {
     const val = e.detail.value; 
     let city = val[1];
@@ -102,38 +121,64 @@ Page({
     this.setData({ currentCity: city });
     this.reload();
   },
-  toCityPage() { wx.navigateTo({ url: `/pages/city/city?current=${this.data.currentCity}` }); },
+
+  toCityPage() {
+    wx.navigateTo({ url: `/pages/city/city?current=${this.data.currentCity}` });
+  },
+
   onSearchTap() {
     const that = this;
     wx.chooseLocation({
-      success(res) { that.setData({ searchKeyword: res.name }); that.reload(); }
+      success(res) {
+        that.setData({ searchKeyword: res.name });
+        that.reload();
+      }
     });
   },
-  clearSearch() { this.setData({ searchKeyword: '' }); this.reload(); },
+  
+  clearSearch() {
+      this.setData({ searchKeyword: '' });
+      this.reload();
+  },
+
   onSearchInput(e) { this.setData({ searchKeyword: e.detail.value }); },
   onSearch() { this.reload(); },
+
   onFilterGender(e) { this.setData({'filter.gender': parseInt(e.detail.value)}); this.reload(); },
   onFilterPrice(e) { this.setData({'filter.priceIdx': parseInt(e.detail.value)}); this.reload(); },
   toggleEnsuite() { this.setData({'filter.ensuite': !this.data.filter.ensuite}); this.reload(); },
-  onPullDownRefresh() { app.pollBadgeStatus(); this.reload(() => wx.stopPullDownRefresh()); },
-  onReachBottom() { if (!this.data.isOver && !this.data.isLoading) { this.setData({page: this.data.page+1}); this.loadData(true); } },
+  
+  onSortChange(e) {
+      const idx = parseInt(e.detail.value);
+      const types = ['new', 'hot'];
+      this.setData({ sortType: types[idx] });
+      this.reload();
+  },
 
-  // --- 核心加载逻辑 ---
+  onPetChange(e) {
+      const idx = parseInt(e.detail.value);
+      const pets = ['不限', '不接受养宠', '接受养猫', '接受养狗'];
+      this.setData({ 'filter.pet': pets[idx] });
+      this.reload();
+  },
+
+  // 加载逻辑
   loadData(isLoadMore = false, cb) {
     this.setData({ isLoading: true });
     if(!isLoadMore) wx.showLoading({ title: '加载中' });
 
     const whereCondition = { city: this.data.currentCity };
-    if (this.data.searchKeyword) whereCondition.community = db.RegExp({ regexp: this.data.searchKeyword, options: 'i' });
+    if (this.data.searchKeyword) {
+      whereCondition.community = db.RegExp({ regexp: this.data.searchKeyword, options: 'i' });
+    }
 
-    // 1. 构造查询
     let query = db.collection('rooms').where(whereCondition);
 
-    // 2. 排序逻辑 (数据库排序)
+    // 排序
     if (this.data.sortType === 'hot') {
-        query = query.orderBy('favCount', 'desc'); // 收藏多在前
+        query = query.orderBy('favCount', 'desc');
     } else {
-        query = query.orderBy('createTime', 'desc'); // 最新在前
+        query = query.orderBy('createTime', 'desc');
     }
 
     query.skip(this.data.page * this.data.pageSize)
@@ -147,57 +192,54 @@ Page({
         const pMin = this.data.priceMin;
         const pMax = this.data.priceMax;
 
-        // 3. 本地筛选
+        // 筛选
         list = list.filter(item => item.status === 'active');
 
         list = list.filter(house => {
-          // A. 宠物筛选
-          // filter.pet 取值: '不限', '不接受养宠', '接受养猫', '接受养狗'
-          // house.pets 取值: ['none'] 或 ['cat','dog'] 或 []
-          if (f.pet !== '不限') {
+          // 宠物
+          if (f.pet && f.pet !== '不限') {
               const housePets = house.pets || [];
-              if (f.pet === '不接受养宠') {
-                  // 要求房源必须是不接受的 (pets包含'none')
-                  if (!housePets.includes('none')) return false;
-              } else if (f.pet === '接受养猫') {
-                  if (!housePets.includes('cat')) return false;
-              } else if (f.pet === '接受养狗') {
-                  if (!housePets.includes('dog')) return false;
-              }
+              if (f.pet === '不接受养宠') { if (!housePets.includes('none')) return false; } 
+              else if (f.pet === '接受养猫') { if (!housePets.includes('cat')) return false; } 
+              else if (f.pet === '接受养狗') { if (!housePets.includes('dog')) return false; }
           }
 
           if (!house.rooms) return false;
           return house.rooms.some(room => {
             if (parseInt(room.status) !== 0) return false; 
             if (f.ensuite && !room.hasEnsuite) return false; 
+            
             const price = parseFloat(room.price) || 0;
             if (price < pMin || price > pMax) return false;
             if (f.priceIdx === 1 && price >= 2000) return false;
             if (f.priceIdx === 2 && (price < 2000 || price > 3000)) return false;
             if (f.priceIdx === 3 && price <= 3000) return false;
-            
+
             const dbExpect = parseInt(room.expectGender); 
             if (f.gender === 1) { if (dbExpect !== 1 && dbExpect !== 0) return false; }
             else if (f.gender === 2) { if (dbExpect !== 2 && dbExpect !== 0) return false; }
             else if (f.gender === 3) { if (dbExpect !== 0) return false; }
-            
             return true; 
           });
         });
 
-        if(this.data.userLoc && this.data.sortType === 'new') {
-           // 仅在“最新发布”模式下计算距离，但不改变排序（保持最新在前）
-           // 如果用户需要“离我最近”，那是另一种排序逻辑。需求说的是“最新或最热”。
-           list.forEach(item => {
-             if(item.location) item._dist = this.calcDist(this.data.userLoc, item.location);
-             if(item._dist) item.distStr = item._dist < 1000 ? item._dist.toFixed(0)+'m' : (item._dist/1000).toFixed(1)+'km';
-           });
+        // 距离
+        if(this.data.userLoc && this.data.sortType !== 'hot') {
+          list.forEach(item => {
+             if(item.location) {
+                item._dist = this.calcDist(this.data.userLoc, item.location);
+                item.distStr = item._dist < 1000 ? item._dist.toFixed(0)+'m' : (item._dist/1000).toFixed(1)+'km';
+             }
+          });
+          // 仅在默认排序下考虑距离，或者不强排距离只显示
         }
 
+        // UI
         list.forEach(item => {
            let cover = '';
            const vacantRoom = item.rooms.find(r => r.status == 0 && r.photos && r.photos.length > 0);
            item.cover = vacantRoom ? vacantRoom.photos[0] : (item.rooms.find(r=>r.photos.length)?.photos[0] || '/images/default-room.png');
+           
            item.dots = item.rooms.map(r => {
              if (r.status == 0) return 'empty';
              let gender = 1; 

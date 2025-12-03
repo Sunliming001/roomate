@@ -1,5 +1,4 @@
 <view class="container">
-  <!-- 1. 自定义顶部导航栏 -->
   <view class="custom-header" style="padding-top:{{statusBarHeight}}px">
     <view class="header-row">
       <view class="back-btn-q" bindtap="goBack">
@@ -9,10 +8,8 @@
     </view>
   </view>
 
-  <!-- 2. 占位块 -->
   <view style="height: {{statusBarHeight + 44}}px; width: 100%; background: #fff;"></view>
 
-  <!-- 3. 顶部相册 -->
   <swiper class="swiper" indicator-dots circular>
     <block wx:for="{{gallery}}" wx:key="index">
       <swiper-item bindtap="previewImg" data-url="{{item.url}}">
@@ -23,17 +20,14 @@
   </swiper>
 
   <view class="content">
-    <!-- 标题卡片 -->
     <view class="card title-card">
       <view class="h1">{{info.community}} {{info.layout.room}}室</view>
       <view class="price">¥{{info.minPrice}}<text class="sub">起/月</text></view>
-      <!-- 新增：宠物信息展示 -->
       <view class="pet-row">
         <text class="pet-tag">{{info.petDisplay}}</text>
       </view>
     </view>
 
-    <!-- 房间分配情况 -->
     <view class="card">
        <view class="st">房间分配情况</view>
        <block wx:for="{{info.rooms}}" wx:key="index">
@@ -49,9 +43,8 @@
                 <block wx:if="{{item.status==1}}">
                    <view class="occ-badge">已入住</view>
                    <view class="occ-info">
-                      <text>{{['男','女'][item.occupantDisplay.gender]}}</text>
-                      <text>·{{item.occupantDisplay.age}}</text>
-                      <text>·{{item.occupantDisplay.job}}</text>
+                      <!-- 修改：显示性别、年龄、职业 -->
+                      <text>{{['男','女'][item.occupantDisplay.gender]}} · {{item.occupantDisplay.age}} · {{item.occupantDisplay.job}}</text>
                    </view>
                 </block>
                 <block wx:else>
@@ -63,19 +56,26 @@
        </block>
     </view>
 
-    <!-- 房主信息 -->
+    <!-- 房主信息增强 -->
     <view class="card pub-card">
        <image class="p-avt" src="{{info.publisher.avatarUrl}}"></image>
        <view class="p-txt">
-          <view class="pn">{{info.publisher.nickName}}</view>
-          <view class="pt">房主</view>
+          <view class="p-row-1">
+             <text class="pn">{{info.publisher.nickName}}</text>
+             <text class="pt">房主</text>
+          </view>
+          <view class="p-row-2">
+             {{info.publisherDisplay.genderStr}} · {{info.publisherDisplay.ageStr}} · {{info.publisherDisplay.job}}
+          </view>
+          <view class="p-tags">
+             <text class="p-tag" wx:for="{{info.publisherDisplay.tags}}" wx:key="*this">{{item}}</text>
+          </view>
        </view>
     </view>
   </view>
 
   <view style="height: 180rpx;"></view>
 
-  <!-- 底部操作栏 -->
   <view class="footer-bar safe-bottom">
     <view class="icon-btn" bindtap="handleFav">
       <text class="icon" style="color: {{isFav ? '#FFD700' : '#666'}}">{{isFav ? '★' : '☆'}}</text>
@@ -93,7 +93,6 @@
     </button>
   </view>
 
-  <!-- 加入弹窗 -->
   <view class="modal-mask" wx:if="{{showJoinModal}}" bindtap="closeJoinModal">
     <view class="modal-content" catchtap="preventBubble">
       <view class="m-title">选择要加入的房间</view>
@@ -109,7 +108,6 @@
     </view>
   </view>
 
-  <!-- 分享弹窗 -->
   <view class="share-mask" wx:if="{{showShareModal}}" bindtap="closeShareModal">
     <view class="share-panel" catchtap="preventBubble">
       <view class="share-title">分享到</view>

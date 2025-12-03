@@ -1,12 +1,17 @@
 <view class="container">
-  <!-- 1. 头部 -->
-  <view class="custom-header" style="padding-top:{{statusBarHeight}}px; height:44px;">
+  <!-- 1. 头部：标题 + 成员头像 -->
+  <view class="custom-header" style="padding-top:{{statusBarHeight}}px;">
     <view class="header-row">
-      <!-- 修改：更 Q 的返回按钮 -->
       <view class="back-btn-q" bindtap="goBack">
         <view class="arrow-icon"></view>
       </view>
-      <view class="header-title">{{title}}</view>
+      <view class="header-center">
+        <view class="header-title">{{title}}</view>
+        <!-- 群成员小头像 -->
+        <view class="header-members">
+           <image wx:for="{{headerAvatars}}" wx:key="*this" src="{{item}}" class="tiny-avt"></image>
+        </view>
+      </view>
     </view>
   </view>
 
@@ -15,40 +20,54 @@
     scroll-y 
     class="chat-scroll" 
     scroll-into-view="{{scrollId}}"
-    style="padding-top: {{statusBarHeight + 44 + 20}}px; padding-bottom: calc({{inputBottom}}px + {{showMore ? '300rpx' : '0rpx'}} + 120rpx + env(safe-area-inset-bottom));"
+    style="padding-top: {{statusBarHeight + 60 + 20}}px; padding-bottom: calc({{inputBottom}}px + {{showMore ? '300rpx' : '0rpx'}} + 120rpx + env(safe-area-inset-bottom));"
     bindtap="closeMore"
   >
     <block wx:for="{{messages}}" wx:key="_id">
       <view class="msg-container {{item.isMe ? 'align-right' : 'align-left'}}" id="msg-{{index}}">
         
+        <view class="status-row" wx:if="{{item.showTime}}">
+           <text class="time-txt">{{item.timeStr}}</text>
+        </view>
+
         <view class="msg-row {{item.isMe ? 'my-msg' : 'other-msg'}}">
-          <image class="avatar" src="{{item.avatar}}"></image>
+          <image class="avatar" src="{{item.avatar}}" catchtap="viewProfile" data-uid="{{item.senderId}}"></image>
           
-          <!-- 文本 -->
-          <view class="bubble" wx:if="{{!item.msgType || item.msgType=='text'}}">
-            <text>{{item.content}}</text>
-          </view>
+          <view class="msg-col">
+             <!-- 新增：显示昵称 (仅对方消息显示) -->
+             <text class="nickname" wx:if="{{!item.isMe}}">{{item.nickName}}</text>
+             
+             <!-- 文本 -->
+             <view class="bubble" wx:if="{{!item.msgType || item.msgType=='text'}}">
+               <text>{{item.content}}</text>
+             </view>
 
-          <!-- 图片 -->
-          <image 
-            wx:if="{{item.msgType=='image'}}" 
-            src="{{item.content}}" 
-            mode="widthFix" 
-            class="msg-img"
-            catchtap="previewImage" 
-            data-src="{{item.content}}"
-          ></image>
+             <!-- 图片 -->
+             <image wx:if="{{item.msgType=='image'}}" src="{{item.content}}" mode="widthFix" class="msg-img" catchtap="previewImage" data-src="{{item.content}}"></image>
 
-          <!-- 定位 -->
-          <view 
-             wx:if="{{item.msgType=='location'}}" 
-             class="msg-loc" 
-             catchtap="openLocation" 
-             data-loc="{{item.location}}"
-          >
-             <view class="loc-name">{{item.location.name}}</view>
-             <view class="loc-addr">{{item.location.address}}</view>
-             <view class="loc-map-placeholder">🗺️ 地图位置</view>
+             <!-- 定位 -->
+             <view wx:if="{{item.msgType=='location'}}" class="msg-loc" catchtap="openLocation" data-loc="{{item.content}}">
+                <view class="loc-name">{{item.content.name}}</view>
+                <view class="loc-addr">{{item.content.address}}</view>
+                <view class="loc-map-placeholder">🗺️ 地图位置</view>
+             </view>
+
+             <!-- 联系方式 -->
+             <view wx:if="{{item.msgType=='contact_req'}}" class="msg-card req">
+                <view class="card-title">👋 交换联系方式</view>
+                <view class="card-desc">{{item.content}}</view>
+                <button wx:if="{{!item.isMe}}" class="card-btn" catchtap="handleAcceptContact">同意并发送</button>
+                <view wx:else class="card-tip">等待对方同意...</view>
+             </view>
+
+             <view wx:if="{{item.msgType=='contact_info'}}" class="msg-card info">
+                <view class="card-title">👤 联系名片</view>
+                <view class="card-row">
+                   <text class="c-label">{{item.content.type}}</text>
+                   <text class="c-val" selectable>{{item.content.value}}</text>
+                </view>
+                <view class="card-tip">长按号码可复制</view>
+             </view>
           </view>
         </view>
 
@@ -63,31 +82,28 @@
 
   <!-- 3. 输入区域 -->
   <view class="input-area" style="bottom: {{inputBottom}}px; padding-bottom: calc({{showMore ? '300rpx' : '20rpx'}} + env(safe-area-inset-bottom))">
-    <view class="more-btn" bindtap="toggleMore">+</view>
-    
-    <input 
-      class="msg-input" 
-      value="{{inputVal}}" 
-      bindinput="onInput" 
-      placeholder="发送消息..." 
-      confirm-type="send" 
-      bindconfirm="send"
-      adjust-position="{{false}}" 
-      bindfocus="onFocus"
-      bindblur="onBlur"
-    />
+    <view class="more-btn-q" bindtap="toggleMore"><view class="plus-icon"></view></view>
+    <input class="msg-input" value="{{inputVal}}" bindinput="onInput" placeholder="发送消息..." confirm-type="send" bindconfirm="send" adjust-position="{{false}}" bindfocus="onFocus" bindblur="onBlur"/>
     <button class="send-btn" bindtap="send">发送</button>
   </view>
 
-  <!-- 4. 更多功能面板 -->
+  <!-- 4. 面板和弹窗保持不变... -->
   <view class="more-panel" wx:if="{{showMore}}">
-     <view class="panel-item" bindtap="sendImage">
-        <view class="p-icon">🖼️</view>
-        <text>照片</text>
-     </view>
-     <view class="panel-item" bindtap="sendLocation">
-        <view class="p-icon">📍</view>
-        <text>位置</text>
-     </view>
+     <view class="panel-item" bindtap="sendImage"><view class="p-icon">🖼️</view><text>照片</text></view>
+     <view class="panel-item" bindtap="sendLocation"><view class="p-icon">📍</view><text>位置</text></view>
+     <view class="panel-item" bindtap="sendContactReq"><view class="p-icon">🤝</view><text>交换联系</text></view>
+  </view>
+  <view class="modal-mask" wx:if="{{showContactModal}}">
+    <view class="modal-box">
+      <view class="modal-title">发送我的联系方式</view>
+      <view class="input-row">
+         <view class="type-sel" bindtap="switchContactType">{{contactType}} ▾</view>
+         <input class="c-input" placeholder="请输入号码" bindinput="onContactInput" value="{{contactValue}}"/>
+      </view>
+      <view class="modal-btns">
+        <button class="c-btn cancel" bindtap="closeContactModal">取消</button>
+        <button class="c-btn confirm" bindtap="submitContact">发送</button>
+      </view>
+    </view>
   </view>
 </view>
