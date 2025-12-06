@@ -1,4 +1,5 @@
 {
+  "lazyCodeLoading": "requiredComponents",
   "pages": [
     "pages/index/index",
     "pages/message/message",
@@ -33,7 +34,7 @@
   },
   "sitemapLocation": "sitemap.json",
   "requiredPrivateInfos": [
-    "getLocation",
+    "getFuzzyLocation",
     "chooseLocation"
   ]
 }

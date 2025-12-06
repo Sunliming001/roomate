@@ -16,15 +16,25 @@ Page({
   reLocate() {
     const that = this;
     this.setData({ currentCity: '定位中...' });
-    wx.getLocation({
-      type: 'gcj02',
+    
+    // 将 wx.getLocation 替换为 wx.getFuzzyLocation
+    wx.getFuzzyLocation({
+      type: 'wgs84', // 模糊定位通常建议使用 wgs84
       success(res) {
-        that.setData({ currentCity: '南京市' }); // 模拟定位成功
+        console.log('模糊定位成功', res);
+        
+        // 注意：getFuzzyLocation 返回的是经纬度，无法直接获得“南京市”这三个字。
+        // 如果你想变成真实的城市名，需要接入腾讯地图SDK进行逆地址解析。
+        // 这里为了保持你原有的逻辑，依然模拟定位到南京市。
+        
+        that.setData({ currentCity: '南京市' }); 
+        
         // 选中并返回
         app.globalData.selectedCity = '南京市';
         wx.navigateBack();
       },
-      fail() {
+      fail(err) {
+        console.error('定位失败', err);
         that.setData({ currentCity: '定位失败' });
       }
     });

@@ -82,13 +82,19 @@ Page({
 
   getUserLocation() {
     const that = this;
-    wx.getLocation({
-      type: 'gcj02',
+    wx.getFuzzyLocation({
+      type: 'wgs84',
       success(res) { 
+        // res 包含 latitude 和 longitude
+        console.log('模糊定位成功:', res);
         that.setData({ userLoc: res });
         that.autoUpdateCity(res);
       },
-      fail() { that.reload(); }
+      fail(err) { 
+        console.error('定位失败或拒绝:', err);
+        // 失败则默认使用南京市加载数据
+        that.reload(); 
+      }
     });
   },
 
